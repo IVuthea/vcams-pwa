@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProjectsStore } from '@/stores/projects';
 import PullToRefresh from '@/components/PullToRefresh.vue';
 import type { ProjectModel } from '@/types/project';
 
 const store = useProjectsStore();
+const router = useRouter();
 const search = ref('');
 
 const onPullRefresh = (): Promise<boolean> => store.fetchProjects();
+
+const goToAttendance = (project: ProjectModel): void => {
+  router.push({ name: 'attendance', params: { projectId: String(project.id) } });
+};
 
 const filtered = computed<ProjectModel[]>(() => {
   const q = search.value.trim().toLowerCase();
@@ -140,6 +146,11 @@ onMounted(() => {
           :key="project.id"
           class="mb-3 project-card"
           elevation="1"
+          role="button"
+          tabindex="0"
+          @click="goToAttendance(project)"
+          @keydown.enter="goToAttendance(project)"
+          @keydown.space.prevent="goToAttendance(project)"
         >
           <div class="project-cover">
             <v-img
@@ -242,10 +253,15 @@ onMounted(() => {
 <style scoped>
 .project-card {
   overflow: hidden;
+  cursor: pointer;
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 .project-card:hover {
   transform: translateY(-1px);
+}
+.project-card:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: 2px;
 }
 .project-cover {
   position: relative;

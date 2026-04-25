@@ -78,6 +78,12 @@ const goEmployees = (): void => {
         >
           Browse employees
         </v-btn>
+        <p class="text-caption text-medium-emphasis mt-3 mb-0">
+          For attendance, open a project from <a
+            href="javascript:void(0)"
+            @click="goProjects"
+          >Browse projects</a> and tap a project card.
+        </p>
       </v-card>
 
       <v-card

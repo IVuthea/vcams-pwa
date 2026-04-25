@@ -40,6 +40,13 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Employees' },
   },
   {
+    path: '/attendance/:projectId',
+    name: 'attendance',
+    component: () => import('@/views/AttendanceView.vue'),
+    props: true,
+    meta: { title: 'Project Attendance' },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: { name: 'home' },
   },

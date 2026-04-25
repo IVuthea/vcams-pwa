@@ -1,9 +1,19 @@
 import { openDB } from 'idb';
 import type { DBSchema, IDBPDatabase } from 'idb';
+import type { AttendancePeriod } from '@/types/attendance';
 
 export interface ScanRecord {
   id?: number;
   value: string;
+  createdAt: number;
+}
+
+export interface AttendanceScanRecord {
+  id?: number;
+  projectId: string;
+  period: AttendancePeriod;
+  employeeId: number;
+  employeeName: string;
   createdAt: number;
 }
 
@@ -31,10 +41,21 @@ interface CubeScannerDB extends DBSchema {
     key: string;
     value: StoredAuth;
   };
+  attendance_scans: {
+    key: number;
+    value: AttendanceScanRecord;
+    indexes: {
+      projectId: string;
+      createdAt: number;
+      // Compound index lets us list "all scans for project X, newest first"
+      // without filtering in JS.
+      projectId_createdAt: [string, number];
+    };
+  };
 }
 
 const DB_NAME = 'cube-scanner';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const AUTH_KEY = 'current';
 
 let dbPromise: Promise<IDBPDatabase<CubeScannerDB>> | null = null;
@@ -53,6 +74,15 @@ function getDB(): Promise<IDBPDatabase<CubeScannerDB>> {
         }
         if (oldVersion < 2) {
           db.createObjectStore('auth');
+        }
+        if (oldVersion < 3) {
+          const store = db.createObjectStore('attendance_scans', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+          store.createIndex('projectId', 'projectId');
+          store.createIndex('createdAt', 'createdAt');
+          store.createIndex('projectId_createdAt', ['projectId', 'createdAt']);
         }
       },
     });
@@ -146,6 +176,103 @@ export async function clearStoredAuth(): Promise<boolean> {
     return true;
   } catch (e) {
     console.error('clearStoredAuth failed', e);
+    return false;
+  }
+}
+
+export async function addAttendanceScan(
+  input: Omit<AttendanceScanRecord, 'id' | 'createdAt'> & { createdAt?: number },
+): Promise<AttendanceScanRecord | null> {
+  try {
+    const db = await getDB();
+    const record: AttendanceScanRecord = {
+      projectId: input.projectId,
+      period: input.period,
+      employeeId: input.employeeId,
+      employeeName: input.employeeName,
+      createdAt: input.createdAt ?? Date.now(),
+    };
+    const id = await db.add('attendance_scans', record);
+    return { ...record, id: id as number };
+  } catch (e) {
+    console.error('addAttendanceScan failed', e);
+    return null;
+  }
+}
+
+export async function listAttendanceScans(
+  projectId: string,
+  limit = 200,
+): Promise<AttendanceScanRecord[]> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction('attendance_scans', 'readonly');
+    const index = tx.store.index('projectId_createdAt');
+    const results: AttendanceScanRecord[] = [];
+    // Range covers all createdAt values for the given projectId; iterate in
+    // reverse so newest comes first.
+    const range = IDBKeyRange.bound([projectId, -Infinity], [projectId, Infinity]);
+    let cursor = await index.openCursor(range, 'prev');
+    while (cursor && results.length < limit) {
+      results.push(cursor.value);
+      cursor = await cursor.continue();
+    }
+    await tx.done;
+    return results;
+  } catch (e) {
+    console.error('listAttendanceScans failed', e);
+    return [];
+  }
+}
+
+export async function deleteAttendanceScan(id: number): Promise<boolean> {
+  try {
+    const db = await getDB();
+    await db.delete('attendance_scans', id);
+    return true;
+  } catch (e) {
+    console.error('deleteAttendanceScan failed', e);
+    return false;
+  }
+}
+
+export async function clearAttendanceScans(projectId: string): Promise<boolean> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction('attendance_scans', 'readwrite');
+    const index = tx.store.index('projectId');
+    let cursor = await index.openCursor(IDBKeyRange.only(projectId));
+    while (cursor) {
+      await cursor.delete();
+      cursor = await cursor.continue();
+    }
+    await tx.done;
+    return true;
+  } catch (e) {
+    console.error('clearAttendanceScans failed', e);
+    return false;
+  }
+}
+
+export async function clearAttendanceScansForPeriod(
+  projectId: string,
+  period: AttendancePeriod,
+): Promise<boolean> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction('attendance_scans', 'readwrite');
+    const index = tx.store.index('projectId');
+    let cursor = await index.openCursor(IDBKeyRange.only(projectId));
+    while (cursor) {
+      if (cursor.value.period === period) {
+        await cursor.delete();
+      }
+      cursor = await cursor.continue();
+    }
+    await tx.done;
+    return true;
+  } catch (e) {
+    console.error('clearAttendanceScansForPeriod failed', e);
     return false;
   }
 }
