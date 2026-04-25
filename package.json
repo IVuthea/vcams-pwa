@@ -1,0 +1,46 @@
+{
+  "name": "cube-scanner",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Installable PWA QR scanner with torch toggle, offline support, and IndexedDB scan history.",
+  "scripts": {
+    "dev": "vite",
+    "dev:android": "node scripts/dev-android.mjs",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "lint": "eslint . --ext .vue,.ts,.js,.cjs,.mjs",
+    "format": "prettier --write \"src/**/*.{vue,ts,js,json,css,scss}\"",
+    "type-check": "vue-tsc --noEmit",
+    "generate:icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "axios": "^1.7.7",
+    "idb": "^8.0.0",
+    "pinia": "^2.2.4",
+    "qr-scanner": "^1.4.2",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5",
+    "vuetify": "^3.7.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "eslint": "^8.57.1",
+    "eslint-plugin-vue": "^9.29.0",
+    "prettier": "^3.3.3",
+    "sharp": "^0.33.5",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.9",
+    "vite-plugin-pwa": "^0.20.5",
+    "vite-plugin-vuetify": "^2.0.4",
+    "vue-tsc": "^2.1.6",
+    "workbox-window": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
