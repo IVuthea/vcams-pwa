@@ -19,7 +19,6 @@ const filtered = computed<EmployeeModel[]>(() => {
       e.role?.name,
       e.role?.code,
       e.working_status,
-      e.wage_type,
     ]
       .filter(Boolean)
       .join(' ')
@@ -39,11 +38,6 @@ const workingStatusColor = (status?: string): string => {
   if (v === 'inactive' || v === 'leave' || v === 'on_leave') return 'warning';
   if (v === 'terminated' || v === 'resigned') return 'error';
   return 'primary';
-};
-
-const wageLabel = (v?: string): string | null => {
-  if (!v) return null;
-  return v.charAt(0).toUpperCase() + v.slice(1).replace(/_/g, ' ');
 };
 
 const onPullRefresh = (): Promise<boolean> => store.fetchEmployees();
@@ -205,7 +199,7 @@ onMounted(() => {
                 >
                   mdi-identifier
                 </v-icon>
-                <span class="text-medium-emphasis mr-2">Code:</span>
+                <span class="text-medium-emphasis mr-2">:</span>
                 <span>{{ employee.code }}</span>
               </div>
               <div
@@ -219,25 +213,11 @@ onMounted(() => {
                 >
                   mdi-phone
                 </v-icon>
-                <span class="text-medium-emphasis mr-2">Phone:</span>
+                <span class="text-medium-emphasis mr-2">:</span>
                 <a
                   :href="`tel:${employee.phone}`"
                   class="text-decoration-none"
                 >{{ employee.phone }}</a>
-              </div>
-              <div
-                v-if="wageLabel(employee.wage_type)"
-                class="d-flex align-center"
-              >
-                <v-icon
-                  size="18"
-                  class="mr-2"
-                  color="medium-emphasis"
-                >
-                  mdi-cash-multiple
-                </v-icon>
-                <span class="text-medium-emphasis mr-2">Wage:</span>
-                <span>{{ wageLabel(employee.wage_type) }}</span>
               </div>
               <div
                 v-if="employee.nfc"

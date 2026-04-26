@@ -8,10 +8,6 @@ export interface ScanRecord {
   createdAt: number;
 }
 
-// 'failed' means the last upload to the admin attempted and threw; absent
-// means the scan has not been submitted (or the previous attempt succeeded).
-export type AttendanceSubmitStatus = 'failed';
-
 export interface AttendanceScanRecord {
   id?: number;
   projectId: string;
@@ -19,7 +15,10 @@ export interface AttendanceScanRecord {
   employeeId: number;
   employeeName: string;
   createdAt: number;
-  submitStatus?: AttendanceSubmitStatus;
+  // The server-supplied error message from the last failed submit attempt.
+  // Presence of this field is the failure flag — absent means the scan has
+  // not been submitted yet, or the most recent attempt succeeded.
+  submitErrorMsg?: string;
 }
 
 export interface AuthUser {
@@ -230,12 +229,12 @@ export async function listAttendanceScans(
   }
 }
 
-// Persist the submit-status flag on a single scan. `null` clears the flag
-// (e.g., after a successful retry). Returns the updated record so callers
-// can patch their in-memory list reactively.
-export async function setAttendanceScanStatus(
+// Persist (or clear) the last submit error message on a single scan.
+// Pass `null` to clear it (e.g., before a retry). Returns the updated
+// record so callers can patch their in-memory list reactively.
+export async function setAttendanceScanError(
   id: number,
-  status: AttendanceSubmitStatus | null,
+  errorMsg: string | null,
 ): Promise<AttendanceScanRecord | null> {
   try {
     const db = await getDB();
@@ -246,16 +245,16 @@ export async function setAttendanceScanStatus(
       return null;
     }
     const next: AttendanceScanRecord = { ...existing };
-    if (status === null) {
-      delete next.submitStatus;
+    if (errorMsg) {
+      next.submitErrorMsg = errorMsg;
     } else {
-      next.submitStatus = status;
+      delete next.submitErrorMsg;
     }
     await tx.store.put(next);
     await tx.done;
     return next;
   } catch (e) {
-    console.error('setAttendanceScanStatus failed', e);
+    console.error('setAttendanceScanError failed', e);
     return null;
   }
 }

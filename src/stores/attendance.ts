@@ -6,9 +6,9 @@ import {
   clearAttendanceScansForPeriod,
   deleteAttendanceScan,
   listAttendanceScans,
-  setAttendanceScanStatus,
+  setAttendanceScanError,
 } from '@/db';
-import type { AttendanceScanRecord, AttendanceSubmitStatus } from '@/db';
+import type { AttendanceScanRecord } from '@/db';
 import http from '@/http/axios';
 import type { AttendancePeriod } from '@/types/attendance';
 
@@ -31,12 +31,12 @@ export interface SubmitSummary {
 // Canonical period order so the batch upload walks shifts predictably:
 // morning → afternoon → OT, in/out paired.
 const PERIOD_ORDER: AttendancePeriod[] = [
-  'morning_in',
-  'morning_out',
-  'afternoon_in',
-  'afternoon_out',
-  'ot_in',
-  'ot_out',
+  'p1_in',
+  'p1_out',
+  'p2_in',
+  'p2_out',
+  'p3_in',
+  'p3_out',
 ];
 
 function pad2(n: number): string {
@@ -77,7 +77,7 @@ function parseEmployeePayload(value: string): {
 // UI state for the Project Attendance screen. Kept in a store so the app bar
 // (in AppLayout) can toggle the scanner dialog that lives inside the view.
 export const useAttendanceStore = defineStore('attendance', () => {
-  const selectedPeriod = ref<AttendancePeriod>('morning_in');
+  const selectedPeriod = ref<AttendancePeriod>('p1_in');
   const scans = ref<AttendanceScanLog[]>([]);
   const currentProjectId = ref<string | null>(null);
   const isLoading = ref(false);
@@ -193,19 +193,18 @@ export const useAttendanceStore = defineStore('attendance', () => {
     let successCount = 0;
     let failureCount = 0;
 
-    // Patch a single scan's submitStatus in the reactive list so the prepend
-    // icon updates without a full reload. `null` removes the flag.
-    const patchLocalStatus = (id: number, status: AttendanceSubmitStatus | null): void => {
-      scans.value = scans.value.map((s) =>
-        s.id === id
-          ? status === null
-            ? (() => {
-                const { submitStatus: _drop, ...rest } = s;
-                return rest as AttendanceScanLog;
-              })()
-            : { ...s, submitStatus: status }
-          : s,
-      );
+    // Patch a single scan's submitErrorMsg in the reactive list so the
+    // prepend icon and inline error update without a full reload. `null`
+    // clears the field (e.g. before a retry).
+    const patchLocalError = (id: number, errorMsg: string | null): void => {
+      scans.value = scans.value.map((s) => {
+        if (s.id !== id) return s;
+        if (!errorMsg) {
+          const { submitErrorMsg: _drop, ...rest } = s;
+          return rest as AttendanceScanLog;
+        }
+        return { ...s, submitErrorMsg: errorMsg };
+      });
     };
 
     try {
@@ -224,16 +223,16 @@ export const useAttendanceStore = defineStore('attendance', () => {
           // shift/direction tab light up as its scans are processed.
           selectedPeriod.value = scan.period;
           submittingScanId.value = id;
-          // Wipe any stale 'failed' badge from a prior attempt so retries
+          // Wipe any stale error message from a prior attempt so retries
           // present a clean slate; we'll re-mark it below if this attempt
           // also fails. Local UI updates first, persistence is best-effort.
-          if (scan.submitStatus) {
-            patchLocalStatus(id, null);
-            void setAttendanceScanStatus(id, null);
+          if (scan.submitErrorMsg) {
+            patchLocalError(id, null);
+            void setAttendanceScanError(id, null);
           }
           const d = new Date(scan.createdAt);
           const date = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-          const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+          const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
           await http.post('attendance/single', {
             project_id: projectIdNum,
             employee_id: scan.employeeId,
@@ -245,8 +244,15 @@ export const useAttendanceStore = defineStore('attendance', () => {
         } catch (e) {
           try {
             console.error('submitAllScans: scan failed', { id, error: e });
-            patchLocalStatus(id, 'failed');
-            await setAttendanceScanStatus(id, 'failed');
+            // The axios response interceptor already extracts {message} from
+            // JSON error bodies and surfaces it on the rejection. Fall back
+            // to a generic message if anything unexpected was thrown.
+            const errorMsg =
+              (e && typeof e === 'object' && 'message' in e
+                ? String((e as { message: unknown }).message)
+                : null) ?? 'Submit failed.';
+            patchLocalError(id, errorMsg);
+            await setAttendanceScanError(id, errorMsg);
           } catch {
             // Swallow any error from logging/state — the batch must keep going.
           }

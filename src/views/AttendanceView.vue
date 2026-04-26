@@ -274,14 +274,6 @@ const formatDate = (ts: number): string => {
             <v-list-item class="px-2">
               <template #prepend>
                 <v-icon
-                  v-if="item.submitStatus === 'failed'"
-                  color="error"
-                  :title="`Last submit failed for ${item.employeeName}`"
-                >
-                  mdi-alert-circle
-                </v-icon>
-                <v-icon
-                  v-else
                   :color="item.period.endsWith('_in') ? 'success' : 'warning'"
                 >
                   {{ item.period.endsWith('_in') ? 'mdi-login-variant' : 'mdi-logout-variant' }}
@@ -292,6 +284,18 @@ const formatDate = (ts: number): string => {
               </v-list-item-title>
               <v-list-item-subtitle>
                 {{ formatDate(item.createdAt) }} {{ formatTime(item.createdAt) }}
+              </v-list-item-subtitle>
+              <v-list-item-subtitle
+                v-if="item.submitErrorMsg"
+                class="text-error scan-error"
+              >
+                <v-icon
+                  size="14"
+                  class="mr-1"
+                >
+                  mdi-alert-circle-outline
+                </v-icon>
+                {{ item.submitErrorMsg }}
               </v-list-item-subtitle>
               <template #append>
                 <v-btn
@@ -472,6 +476,13 @@ const formatDate = (ts: number): string => {
 .scan-value {
   word-break: break-all;
   white-space: normal;
+}
+.scan-error {
+  white-space: normal;
+  display: flex;
+  align-items: flex-start;
+  margin-top: 2px;
+  opacity: 1;
 }
 .min-width-0 {
   min-width: 0;
