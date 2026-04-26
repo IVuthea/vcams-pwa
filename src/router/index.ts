@@ -47,6 +47,13 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Project Attendance' },
   },
   {
+    path: '/attendance/:projectId/scan',
+    name: 'attendance-scan',
+    component: () => import('@/views/AttendanceScanView.vue'),
+    props: true,
+    meta: { title: 'Scan Attendance', fullscreen: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: { name: 'home' },
   },

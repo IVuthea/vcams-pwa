@@ -188,6 +188,42 @@ export function useQrScanner(): UseQrScannerReturn {
           highlightCodeOutline: true,
           maxScansPerSecond: 5,
           returnDetailedScanResult: true,
+          // Match the visible scan region to the reticle frame in
+          // ScannerView/AttendanceScanView (~min(70vw, 70vh, 320px)), shrunk
+          // slightly so the bracket highlight sits inside the frame.
+          //
+          // The qr-scanner region is in VIDEO pixels, but the reticle is sized
+          // in CSS pixels and the <video> uses object-fit: cover — so we have
+          // to convert CSS px → video px through the same cover-scale the
+          // browser uses, otherwise the bracket can render wider than the
+          // frame on landscape-camera-in-portrait-viewport setups.
+          calculateScanRegion: (video: HTMLVideoElement) => {
+            const rect = video.getBoundingClientRect();
+            const reticleCss = Math.min(
+              window.innerWidth * 0.7,
+              window.innerHeight * 0.7,
+              320,
+            );
+            const targetCss = reticleCss * 0.9; // sit inside the frame
+            const coverScale = Math.max(
+              rect.width / video.videoWidth,
+              rect.height / video.videoHeight,
+            );
+            // Fall back to a half of the smaller video dim if the rect/scale
+            // is degenerate (e.g. zero before layout settles).
+            const safeScale = coverScale > 0 ? coverScale : 1;
+            const maxVideo = Math.min(video.videoWidth, video.videoHeight);
+            const size = Math.max(
+              80,
+              Math.min(maxVideo, Math.round(targetCss / safeScale)),
+            );
+            return {
+              x: Math.round((video.videoWidth - size) / 2),
+              y: Math.round((video.videoHeight - size) / 2),
+              width: size,
+              height: size,
+            };
+          },
         },
       );
 

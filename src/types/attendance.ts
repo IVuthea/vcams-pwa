@@ -22,6 +22,6 @@ export const ATTENDANCE_PERIODS: AttendancePeriodMeta[] = [
   { key: 'morning_out', shift: 'morning', direction: 'out', shiftLabel: 'Morning', directionLabel: 'Out' },
   { key: 'afternoon_in', shift: 'afternoon', direction: 'in', shiftLabel: 'Afternoon', directionLabel: 'In' },
   { key: 'afternoon_out', shift: 'afternoon', direction: 'out', shiftLabel: 'Afternoon', directionLabel: 'Out' },
-  { key: 'ot_in', shift: 'ot', direction: 'in', shiftLabel: 'OT', directionLabel: 'In' },
-  { key: 'ot_out', shift: 'ot', direction: 'out', shiftLabel: 'OT', directionLabel: 'Out' },
+  { key: 'ot_in', shift: 'ot', direction: 'in', shiftLabel: 'Overtime', directionLabel: 'In' },
+  { key: 'ot_out', shift: 'ot', direction: 'out', shiftLabel: 'Overtime', directionLabel: 'Out' },
 ];

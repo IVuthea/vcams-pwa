@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import {
   addAttendanceScan,
   clearAttendanceScans,
   clearAttendanceScansForPeriod,
   deleteAttendanceScan,
   listAttendanceScans,
+  setAttendanceScanStatus,
 } from '@/db';
-import type { AttendanceScanRecord } from '@/db';
+import type { AttendanceScanRecord, AttendanceSubmitStatus } from '@/db';
+import http from '@/http/axios';
 import type { AttendancePeriod } from '@/types/attendance';
 
 export type AttendanceScanLog = AttendanceScanRecord;
@@ -15,6 +17,40 @@ export type AttendanceScanLog = AttendanceScanRecord;
 export type RecordScanResult =
   | { ok: true; log: AttendanceScanLog }
   | { ok: false; error: string };
+
+export type PreviewScanResult =
+  | { ok: true; employeeId: number; employeeName: string }
+  | { ok: false; error: string };
+
+export interface SubmitSummary {
+  total: number;
+  successCount: number;
+  failureCount: number;
+}
+
+// Canonical period order so the batch upload walks shifts predictably:
+// morning → afternoon → OT, in/out paired.
+const PERIOD_ORDER: AttendancePeriod[] = [
+  'morning_in',
+  'morning_out',
+  'afternoon_in',
+  'afternoon_out',
+  'ot_in',
+  'ot_out',
+];
+
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+// Pause between scans so the user can perceive the per-item progress —
+// without it, fast networks would blow through the list before the
+// indicator on each row has a chance to render.
+const SUBMIT_STEP_DELAY_MS = 400;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 // QR payload shape: '{"id":21,"name":"Dara Song"}'. Returns null when the
 // payload isn't JSON or is missing required fields — the caller decides
@@ -42,21 +78,24 @@ function parseEmployeePayload(value: string): {
 // (in AppLayout) can toggle the scanner dialog that lives inside the view.
 export const useAttendanceStore = defineStore('attendance', () => {
   const selectedPeriod = ref<AttendancePeriod>('morning_in');
-  const isScannerOpen = ref(false);
   const scans = ref<AttendanceScanLog[]>([]);
   const currentProjectId = ref<string | null>(null);
   const isLoading = ref(false);
+  // Submission state for the batch upload to `attendance/single`.
+  // `submittingScanId` is the scan currently in-flight; the period buttons
+  // and the cross icon both key off it.
+  const isSubmitting = ref(false);
+  const submittingScanId = ref<number | null>(null);
+  // Derived from the in-flight scan so the period buttons can show which
+  // shift/direction is currently being uploaded — distinct from
+  // `selectedPeriod`, which is the user's (or auto-walked) view selection.
+  const submittingPeriod = computed<AttendancePeriod | null>(() => {
+    if (submittingScanId.value === null) return null;
+    return scans.value.find((s) => s.id === submittingScanId.value)?.period ?? null;
+  });
 
   function selectPeriod(period: AttendancePeriod): void {
     selectedPeriod.value = period;
-  }
-
-  function openScanner(): void {
-    isScannerOpen.value = true;
-  }
-
-  function closeScanner(): void {
-    isScannerOpen.value = false;
   }
 
   async function loadScans(projectId: string): Promise<void> {
@@ -66,6 +105,14 @@ export const useAttendanceStore = defineStore('attendance', () => {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  function previewScan(value: string): PreviewScanResult {
+    const parsed = parseEmployeePayload(value);
+    if (!parsed) {
+      return { ok: false, error: 'Invalid QR — expected JSON with "id" and "name".' };
+    }
+    return { ok: true, employeeId: parsed.employeeId, employeeName: parsed.employeeName };
   }
 
   async function recordScan(value: string): Promise<RecordScanResult> {
@@ -117,6 +164,103 @@ export const useAttendanceStore = defineStore('attendance', () => {
     }
   }
 
+  // POST every recorded scan to `attendance/single`, one at a time, walking
+  // periods in canonical order. Per-item status is exposed via
+  // `submittingScanId` (in-flight) and `submitResults` (final).
+  //
+  // Contract: the batch ALWAYS runs to completion. Each scan is wrapped in
+  // its own try/catch so a network/server failure on one scan never aborts
+  // the rest — the failed scan is marked 'error' and the loop moves on.
+  async function submitAllScans(): Promise<SubmitSummary> {
+    const empty: SubmitSummary = { total: 0, successCount: 0, failureCount: 0 };
+    if (isSubmitting.value || !currentProjectId.value) return empty;
+
+    const ordered = scans.value
+      .filter((s) => s.id !== undefined)
+      .slice()
+      .sort((a, b) => {
+        const pa = PERIOD_ORDER.indexOf(a.period);
+        const pb = PERIOD_ORDER.indexOf(b.period);
+        if (pa !== pb) return pa - pb;
+        return a.createdAt - b.createdAt;
+      });
+
+    if (ordered.length === 0) return empty;
+
+    const projectIdNum = Number(currentProjectId.value);
+    isSubmitting.value = true;
+
+    let successCount = 0;
+    let failureCount = 0;
+
+    // Patch a single scan's submitStatus in the reactive list so the prepend
+    // icon updates without a full reload. `null` removes the flag.
+    const patchLocalStatus = (id: number, status: AttendanceSubmitStatus | null): void => {
+      scans.value = scans.value.map((s) =>
+        s.id === id
+          ? status === null
+            ? (() => {
+                const { submitStatus: _drop, ...rest } = s;
+                return rest as AttendanceScanLog;
+              })()
+            : { ...s, submitStatus: status }
+          : s,
+      );
+    };
+
+    try {
+      let first = true;
+      for (const scan of ordered) {
+        // Pace the batch so the UI can render per-item progress between
+        // requests. Skip the first iteration so submission feels responsive.
+        if (!first) await delay(SUBMIT_STEP_DELAY_MS);
+        first = false;
+        // Wrap the entire iteration body in try/catch — including state
+        // assignments and date formatting — so nothing inside a single
+        // iteration can break the loop. Failures are recorded and we move on.
+        const id = scan.id as number;
+        try {
+          // Walk the period selector forward so the user can watch each
+          // shift/direction tab light up as its scans are processed.
+          selectedPeriod.value = scan.period;
+          submittingScanId.value = id;
+          // Wipe any stale 'failed' badge from a prior attempt so retries
+          // present a clean slate; we'll re-mark it below if this attempt
+          // also fails. Local UI updates first, persistence is best-effort.
+          if (scan.submitStatus) {
+            patchLocalStatus(id, null);
+            void setAttendanceScanStatus(id, null);
+          }
+          const d = new Date(scan.createdAt);
+          const date = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+          const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+          await http.post('attendance/single', {
+            project_id: projectIdNum,
+            employee_id: scan.employeeId,
+            period: scan.period,
+            date,
+            time,
+          });
+          successCount++;
+        } catch (e) {
+          try {
+            console.error('submitAllScans: scan failed', { id, error: e });
+            patchLocalStatus(id, 'failed');
+            await setAttendanceScanStatus(id, 'failed');
+          } catch {
+            // Swallow any error from logging/state — the batch must keep going.
+          }
+          failureCount++;
+        }
+      }
+    } finally {
+      submittingScanId.value = null;
+      isSubmitting.value = false;
+    }
+
+    return { total: ordered.length, successCount, failureCount };
+  }
+
   // Switching to a different project loads that project's persisted scans.
   async function setProject(id: string | null): Promise<void> {
     if (currentProjectId.value === id) return;
@@ -130,18 +274,20 @@ export const useAttendanceStore = defineStore('attendance', () => {
 
   return {
     selectedPeriod,
-    isScannerOpen,
     scans,
     currentProjectId,
     isLoading,
+    isSubmitting,
+    submittingScanId,
+    submittingPeriod,
     selectPeriod,
-    openScanner,
-    closeScanner,
+    previewScan,
     recordScan,
     removeScan,
     clearScans,
     clearScansForCurrentPeriod,
     loadScans,
     setProject,
+    submitAllScans,
   };
 });

@@ -14,6 +14,7 @@ const online = useOnline();
 const auth = useAuthStore();
 
 const isDark = computed(() => theme.global.current.value.dark);
+const isFullscreen = computed(() => route.meta?.fullscreen === true);
 
 const toggleTheme = (): void => {
   const next = isDark.value ? 'light' : 'dark';
@@ -38,12 +39,15 @@ const navValue = computed<string>({
   },
 });
 
-const showBottomNav = computed(() => display.smAndDown.value && auth.isAuthenticated);
+const showBottomNav = computed(
+  () => display.smAndDown.value && auth.isAuthenticated && !isFullscreen.value,
+);
 </script>
 
 <template>
   <v-app>
     <v-app-bar
+      v-if="!isFullscreen"
       density="comfortable"
       color="primary"
       flat
@@ -73,11 +77,13 @@ const showBottomNav = computed(() => display.smAndDown.value && auth.isAuthentic
 
     <v-main>
       <v-container
+        v-if="!isFullscreen"
         fluid
         class="pa-3 pa-sm-4"
       >
         <slot />
       </v-container>
+      <slot v-else />
     </v-main>
 
     <v-bottom-navigation

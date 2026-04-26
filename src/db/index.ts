@@ -8,6 +8,10 @@ export interface ScanRecord {
   createdAt: number;
 }
 
+// 'failed' means the last upload to the admin attempted and threw; absent
+// means the scan has not been submitted (or the previous attempt succeeded).
+export type AttendanceSubmitStatus = 'failed';
+
 export interface AttendanceScanRecord {
   id?: number;
   projectId: string;
@@ -15,6 +19,7 @@ export interface AttendanceScanRecord {
   employeeId: number;
   employeeName: string;
   createdAt: number;
+  submitStatus?: AttendanceSubmitStatus;
 }
 
 export interface AuthUser {
@@ -222,6 +227,36 @@ export async function listAttendanceScans(
   } catch (e) {
     console.error('listAttendanceScans failed', e);
     return [];
+  }
+}
+
+// Persist the submit-status flag on a single scan. `null` clears the flag
+// (e.g., after a successful retry). Returns the updated record so callers
+// can patch their in-memory list reactively.
+export async function setAttendanceScanStatus(
+  id: number,
+  status: AttendanceSubmitStatus | null,
+): Promise<AttendanceScanRecord | null> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction('attendance_scans', 'readwrite');
+    const existing = await tx.store.get(id);
+    if (!existing) {
+      await tx.done;
+      return null;
+    }
+    const next: AttendanceScanRecord = { ...existing };
+    if (status === null) {
+      delete next.submitStatus;
+    } else {
+      next.submitStatus = status;
+    }
+    await tx.store.put(next);
+    await tx.done;
+    return next;
+  } catch (e) {
+    console.error('setAttendanceScanStatus failed', e);
+    return null;
   }
 }
 
