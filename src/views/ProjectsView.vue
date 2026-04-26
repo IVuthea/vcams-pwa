@@ -189,16 +189,6 @@ onMounted(() => {
                 {{ (project.sort_name || project.full_name || '?').charAt(0).toUpperCase() }}
               </span>
             </div>
-
-            <v-chip
-              v-if="project.visibility_label || project.visibility"
-              :color="visibilityColor(project.visibility)"
-              size="small"
-              variant="elevated"
-              class="project-cover__badge"
-            >
-              {{ project.visibility_label || project.visibility }}
-            </v-chip>
           </div>
 
           <v-card-item class="pb-1">
