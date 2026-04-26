@@ -14,18 +14,31 @@ const initialTheme = stored ?? (prefersDark ? 'dark' : 'light');
 // Re-export so AppLayout doesn't need to know the storage details.
 export { THEME_STORAGE_KEY };
 
+// Light palette derived from the cube icon's blue. The page background is
+// a soft cool tint rather than pure white so cards, app bars, and bottom
+// nav read as raised surfaces without needing heavy elevation. Primary is
+// nudged one step deeper than Material Blue 500 for AA contrast on white,
+// and surface-variant gives dividers/disabled fills something to land on.
 const lightTheme = {
   dark: false,
   colors: {
-    primary: '#2196F3',
-    secondary: '#42A5F5',
-    accent: '#1976D2',
+    primary: '#1E88E5',
+    'primary-darken-1': '#1565C0',
+    secondary: '#64B5F6',
+    accent: '#0D47A1',
     info: '#0288D1',
     success: '#2E7D32',
     warning: '#ED6C02',
     error: '#C62828',
-    background: '#FFFFFF',
+    background: '#F4F7FB',
     surface: '#FFFFFF',
+    'surface-bright': '#FFFFFF',
+    'surface-variant': '#E7ECF3',
+    'on-primary': '#FFFFFF',
+    'on-secondary': '#0B2545',
+    'on-background': '#1F2937',
+    'on-surface': '#1F2937',
+    'on-surface-variant': '#3B4252',
   },
 };
 
