@@ -16,8 +16,8 @@ const props = defineProps<{
 const store = useAttendanceStore();
 const projectsStore = useProjectsStore();
 
-const project = computed(() =>
-  projectsStore.projects.find((p) => String(p.id) === String(props.projectId)) ?? null,
+const project = computed(
+  () => projectsStore.projects.find((p) => String(p.id) === String(props.projectId)) ?? null,
 );
 
 const projectTitle = computed(
@@ -100,13 +100,11 @@ const shiftColumns = computed<ShiftColumn[]>(() => {
   }));
 });
 
-const selectedMeta = computed(() =>
-  ATTENDANCE_PERIODS.find((p) => p.key === store.selectedPeriod) ?? ATTENDANCE_PERIODS[0],
+const selectedMeta = computed(
+  () => ATTENDANCE_PERIODS.find((p) => p.key === store.selectedPeriod) ?? ATTENDANCE_PERIODS[0],
 );
 
-const periodScans = computed(() =>
-  store.scans.filter((s) => s.period === store.selectedPeriod),
-);
+const periodScans = computed(() => store.scans.filter((s) => s.period === store.selectedPeriod));
 
 const directionColor = (meta: AttendancePeriodMeta): string =>
   meta.direction === 'in' ? 'success' : 'warning';
@@ -133,16 +131,8 @@ const formatDate = (ts: number): string => {
 </script>
 
 <template>
-  <v-row
-    justify="center"
-    class="ma-0"
-  >
-    <v-col
-      cols="12"
-      md="10"
-      lg="8"
-      class="pa-0"
-    >
+  <v-row justify="center" class="ma-0">
+    <v-col cols="12" md="10" lg="8" class="pa-0">
       <div class="d-flex align-center mb-3">
         <v-btn
           icon="mdi-arrow-left"
@@ -182,20 +172,14 @@ const formatDate = (ts: number): string => {
         </v-btn>
       </div>
 
-      <v-card
-        class="pa-3 pa-sm-4"
-        elevation="1"
-      >
+      <v-card class="pa-3 pa-sm-4" elevation="1">
         <div class="text-caption text-medium-emphasis mb-2">
-          Select a period, then tap <v-icon size="14">mdi-qrcode-scan</v-icon> Scan to record attendance.
+          Select a period, then tap <v-icon size="14">mdi-qrcode-scan</v-icon> Scan to record
+          attendance.
         </div>
 
         <div class="periods-row">
-          <div
-            v-for="column in shiftColumns"
-            :key="column.shift"
-            class="period-column"
-          >
+          <div v-for="column in shiftColumns" :key="column.shift" class="period-column">
             <div class="period-column__label">
               {{ column.shiftLabel }}
             </div>
@@ -221,13 +205,9 @@ const formatDate = (ts: number): string => {
             </div>
           </div>
         </div>
-
       </v-card>
 
-      <v-card
-        class="pa-3 pa-sm-4 mt-4"
-        elevation="1"
-      >
+      <v-card class="pa-3 pa-sm-4 mt-4" elevation="1">
         <div class="d-flex align-center mb-2 ga-2">
           <h2 class="text-subtitle-1 font-weight-bold">
             {{ selectedMeta.shiftLabel }} · {{ selectedMeta.directionLabel }}
@@ -254,28 +234,14 @@ const formatDate = (ts: number): string => {
           </v-btn>
         </div>
 
-        <v-progress-linear
-          v-if="store.isLoading"
-          indeterminate
-          color="primary"
-          class="mb-2"
-        />
+        <v-progress-linear v-if="store.isLoading" indeterminate color="primary" class="mb-2" />
 
-        <v-list
-          v-if="periodScans.length > 0"
-          density="compact"
-          class="pa-0"
-        >
-          <template
-            v-for="(item, idx) in periodScans"
-            :key="item.id"
-          >
+        <v-list v-if="periodScans.length > 0" density="compact" class="pa-0">
+          <template v-for="(item, idx) in periodScans" :key="item.id">
             <v-divider v-if="idx > 0" />
             <v-list-item class="px-2">
               <template #prepend>
-                <v-icon
-                  :color="item.period.endsWith('_in') ? 'success' : 'warning'"
-                >
+                <v-icon :color="item.period.endsWith('_in') ? 'success' : 'warning'">
                   {{ item.period.endsWith('_in') ? 'mdi-login-variant' : 'mdi-logout-variant' }}
                 </v-icon>
               </template>
@@ -285,16 +251,8 @@ const formatDate = (ts: number): string => {
               <v-list-item-subtitle>
                 {{ formatDate(item.createdAt) }} {{ formatTime(item.createdAt) }}
               </v-list-item-subtitle>
-              <v-list-item-subtitle
-                v-if="item.submitErrorMsg"
-                class="text-error scan-error"
-              >
-                <v-icon
-                  size="14"
-                  class="mr-1"
-                >
-                  mdi-alert-circle-outline
-                </v-icon>
+              <v-list-item-subtitle v-if="item.submitErrorMsg" class="text-error scan-error">
+                <v-icon size="14" class="mr-1"> mdi-alert-circle-outline </v-icon>
                 {{ item.submitErrorMsg }}
               </v-list-item-subtitle>
               <template #append>
@@ -312,12 +270,9 @@ const formatDate = (ts: number): string => {
           </template>
         </v-list>
 
-        <div
-          v-else-if="!store.isLoading"
-          class="text-body-2 text-medium-emphasis text-center pa-4"
-        >
-          No scans for {{ selectedMeta.shiftLabel }} {{ selectedMeta.directionLabel }} yet.
-          Tap <v-icon size="14">mdi-qrcode-scan</v-icon> to scan an employee.
+        <div v-else-if="!store.isLoading" class="text-body-2 text-medium-emphasis text-center pa-4">
+          No scans for {{ selectedMeta.shiftLabel }} {{ selectedMeta.directionLabel }} yet. Tap
+          <v-icon size="14">mdi-qrcode-scan</v-icon> to scan an employee.
         </div>
       </v-card>
     </v-col>
@@ -329,55 +284,31 @@ const formatDate = (ts: number): string => {
     @update:model-value="(v) => !v && (pendingDelete = null)"
   >
     <v-card v-if="pendingDelete">
-      <v-card-title class="text-h6">
-        Delete this scan?
-      </v-card-title>
+      <v-card-title class="text-h6"> Delete this scan? </v-card-title>
       <v-card-text>
-        Remove <strong>{{ pendingDelete.employeeName }}</strong>
-        (#{{ pendingDelete.employeeId }}) from
-        {{ selectedMeta.shiftLabel }} {{ selectedMeta.directionLabel }}?
-        This cannot be undone.
+        Remove <strong>{{ pendingDelete.employeeName }}</strong> (#{{ pendingDelete.employeeId }})
+        from {{ selectedMeta.shiftLabel }} {{ selectedMeta.directionLabel }}? This cannot be undone.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          variant="text"
-          @click="pendingDelete = null"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          color="error"
-          variant="elevated"
-          prepend-icon="mdi-delete"
-          @click="onConfirmDelete"
-        >
+        <v-btn variant="text" @click="pendingDelete = null"> Cancel </v-btn>
+        <v-btn color="error" variant="elevated" prepend-icon="mdi-delete" @click="onConfirmDelete">
           Delete
         </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 
-  <v-dialog
-    v-model="confirmSubmitOpen"
-    max-width="420"
-  >
+  <v-dialog v-model="confirmSubmitOpen" max-width="420">
     <v-card>
-      <v-card-title class="text-h6">
-        Submit attendance to admin?
-      </v-card-title>
+      <v-card-title class="text-h6"> Submit attendance to admin? </v-card-title>
       <v-card-text>
         This will upload {{ store.scans.length }} scan{{ store.scans.length === 1 ? '' : 's' }}
         across all periods, one at a time. Make sure you are online before continuing.
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          variant="text"
-          @click="confirmSubmitOpen = false"
-        >
-          Cancel
-        </v-btn>
+        <v-btn variant="text" @click="confirmSubmitOpen = false"> Cancel </v-btn>
         <v-btn
           color="success"
           variant="elevated"
@@ -390,10 +321,7 @@ const formatDate = (ts: number): string => {
     </v-card>
   </v-dialog>
 
-  <v-dialog
-    v-model="confirmClearOpen"
-    max-width="420"
-  >
+  <v-dialog v-model="confirmClearOpen" max-width="420">
     <v-card>
       <v-card-title class="text-h6">
         Clear {{ selectedMeta.shiftLabel }} {{ selectedMeta.directionLabel }} scans?
@@ -404,12 +332,7 @@ const formatDate = (ts: number): string => {
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          variant="text"
-          @click="confirmClearOpen = false"
-        >
-          Cancel
-        </v-btn>
+        <v-btn variant="text" @click="confirmClearOpen = false"> Cancel </v-btn>
         <v-btn
           color="error"
           variant="elevated"
@@ -422,12 +345,7 @@ const formatDate = (ts: number): string => {
     </v-card>
   </v-dialog>
 
-  <v-snackbar
-    v-model="snackbar.show"
-    :color="snackbar.color"
-    location="bottom"
-    :timeout="2000"
-  >
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" :timeout="2000">
     {{ snackbar.text }}
   </v-snackbar>
 </template>

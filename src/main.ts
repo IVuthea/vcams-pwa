@@ -38,7 +38,10 @@ configureAuthHooks({
 });
 
 // Restore the persisted session before mounting so the router guard sees
-// the right `isAuthenticated` state on first navigation.
-await auth.restore();
-
-app.mount('#app');
+// the right `isAuthenticated` state on first navigation. Wrapped in an
+// async IIFE rather than top-level await so the bundle stays compatible
+// with the es2020 build target.
+void (async () => {
+  await auth.restore();
+  app.mount('#app');
+})();

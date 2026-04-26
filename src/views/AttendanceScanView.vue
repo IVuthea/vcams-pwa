@@ -58,8 +58,8 @@ const snackbar = ref<{ show: boolean; text: string; color: string }>({
 const pending = ref<{ rawValue: string; employeeId: number; employeeName: string } | null>(null);
 const isSaving = ref(false);
 
-const project = computed(() =>
-  projectsStore.projects.find((p) => String(p.id) === String(props.projectId)) ?? null,
+const project = computed(
+  () => projectsStore.projects.find((p) => String(p.id) === String(props.projectId)) ?? null,
 );
 
 const projectTitle = computed(
@@ -208,15 +208,8 @@ onBeforeUnmount(async () => {
 
 <template>
   <div class="scanner-screen">
-    <v-toolbar
-      density="comfortable"
-      color="primary"
-    >
-      <v-btn
-        icon="mdi-arrow-left"
-        variant="text"
-        @click="onClose"
-      />
+    <v-toolbar density="comfortable" color="primary">
+      <v-btn icon="mdi-arrow-left" variant="text" @click="onClose" />
       <v-toolbar-title class="font-weight-bold">
         <div class="text-truncate">
           {{ headerTitle }}
@@ -228,49 +221,23 @@ onBeforeUnmount(async () => {
     </v-toolbar>
 
     <div class="scanner-screen__body">
-      <div
-        v-if="!secure"
-        class="text-center pa-6 text-white"
-      >
-        <v-icon
-          size="56"
-          color="warning"
-          class="mb-2"
-        >
-          mdi-lock-alert
-        </v-icon>
-        <h2 class="text-h6 mb-2">
-          Secure context required
-        </h2>
+      <div v-if="!secure" class="text-center pa-6 text-white">
+        <v-icon size="56" color="warning" class="mb-2"> mdi-lock-alert </v-icon>
+        <h2 class="text-h6 mb-2">Secure context required</h2>
         <p class="text-body-2">
-          The camera API only works on <strong>https://</strong> URLs or
-          <strong>localhost</strong>.
+          The camera API only works on <strong>https://</strong> URLs or <strong>localhost</strong>.
         </p>
       </div>
 
-      <div
-        v-else-if="!cameraApiAvailable"
-        class="text-center pa-6 text-white"
-      >
-        <v-icon
-          size="56"
-          color="warning"
-          class="mb-2"
-        >
-          mdi-camera-off
-        </v-icon>
-        <h2 class="text-h6 mb-2">
-          Camera not available
-        </h2>
+      <div v-else-if="!cameraApiAvailable" class="text-center pa-6 text-white">
+        <v-icon size="56" color="warning" class="mb-2"> mdi-camera-off </v-icon>
+        <h2 class="text-h6 mb-2">Camera not available</h2>
         <p class="text-body-2">
           This browser does not expose the camera API. On iOS, only Safari can access the camera.
         </p>
       </div>
 
-      <div
-        v-else
-        class="scanner-screen__viewport"
-      >
+      <div v-else class="scanner-screen__viewport">
         <video
           ref="videoRef"
           class="scanner-screen__video"
@@ -281,11 +248,7 @@ onBeforeUnmount(async () => {
           disablepictureinpicture
         />
 
-        <div
-          v-if="isScanning && !isStarting"
-          class="scanner-reticle"
-          aria-hidden="true"
-        >
+        <div v-if="isScanning && !isStarting" class="scanner-reticle" aria-hidden="true">
           <div class="scanner-reticle__frame">
             <!-- <span class="scanner-reticle__corner scanner-reticle__corner--tl" /> -->
             <!-- <span class="scanner-reticle__corner scanner-reticle__corner--tr" /> -->
@@ -300,21 +263,12 @@ onBeforeUnmount(async () => {
           class="scanner-reticle__hint"
           aria-hidden="true"
         >
-          <v-icon
-            size="20"
-            class="scanner-reticle__hint-icon"
-          >
-            mdi-qrcode-scan
-          </v-icon>
+          <v-icon size="20" class="scanner-reticle__hint-icon"> mdi-qrcode-scan </v-icon>
           <span>Point the camera at a QR code</span>
         </div>
 
         <transition name="flash">
-          <div
-            v-if="flashOn"
-            class="scanner-flash"
-            aria-hidden="true"
-          />
+          <div v-if="flashOn" class="scanner-flash" aria-hidden="true" />
         </transition>
 
         <v-btn
@@ -335,25 +289,13 @@ onBeforeUnmount(async () => {
           @click="onToggleTorch"
         />
 
-        <div
-          v-if="pending"
-          class="scanner-pending"
-          role="dialog"
-          aria-live="polite"
-        >
-          <div class="scanner-pending__label">
-            Confirm attendance
-          </div>
+        <div v-if="pending" class="scanner-pending" role="dialog" aria-live="polite">
+          <div class="scanner-pending__label">Confirm attendance</div>
           <div class="scanner-pending__name">
             {{ pending.employeeName }}
           </div>
           <div class="scanner-pending__actions">
-            <v-btn
-              variant="text"
-              color="white"
-              :disabled="isSaving"
-              @click="onCancelPending"
-            >
+            <v-btn variant="text" color="white" :disabled="isSaving" @click="onCancelPending">
               Cancel
             </v-btn>
             <v-btn
@@ -367,14 +309,8 @@ onBeforeUnmount(async () => {
           </div>
         </div>
 
-        <div
-          v-if="isStarting"
-          class="scanner-screen__overlay"
-        >
-          <v-progress-circular
-            indeterminate
-            color="white"
-          />
+        <div v-if="isStarting" class="scanner-screen__overlay">
+          <v-progress-circular indeterminate color="white" />
           <span class="scanner-screen__overlay-text">Starting camera…</span>
         </div>
 
@@ -387,10 +323,7 @@ onBeforeUnmount(async () => {
           @keydown.enter="onEnableCamera"
           @keydown.space.prevent="onEnableCamera"
         >
-          <v-icon
-            size="48"
-            color="white"
-          >
+          <v-icon size="48" color="white">
             {{ permissionState === 'denied' ? 'mdi-camera-off' : 'mdi-camera' }}
           </v-icon>
           <span class="scanner-screen__overlay-text">
@@ -404,10 +337,7 @@ onBeforeUnmount(async () => {
       </div>
     </div>
 
-    <div
-      v-if="showEnableButton || error"
-      class="scanner-screen__controls"
-    >
+    <div v-if="showEnableButton || error" class="scanner-screen__controls">
       <v-btn
         v-if="showEnableButton"
         color="primary"
@@ -430,12 +360,7 @@ onBeforeUnmount(async () => {
       {{ error }}
     </v-alert>
 
-    <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      location="bottom"
-      :timeout="2000"
-    >
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" :timeout="2000">
       {{ snackbar.text }}
     </v-snackbar>
   </div>
@@ -698,5 +623,4 @@ onBeforeUnmount(async () => {
 .flash-leave-to {
   opacity: 0;
 }
-
 </style>

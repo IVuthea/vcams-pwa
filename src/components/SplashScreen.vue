@@ -19,26 +19,11 @@ defineProps<{
     >
       <div class="splash__inner">
         <div class="splash__logo">
-          <v-icon
-            size="72"
-            color="white"
-          >
-            mdi-cube-outline
-          </v-icon>
+          <v-icon size="72" color="white"> mdi-cube-outline </v-icon>
         </div>
-        <h1 class="splash__title">
-          Cube Scanner
-        </h1>
-        <p class="splash__welcome">
-          Welcome — fast, offline-capable QR scanning.
-        </p>
-        <v-progress-circular
-          indeterminate
-          color="primary"
-          size="32"
-          width="3"
-          class="mt-4"
-        />
+        <h1 class="splash__title">Cube Scanner</h1>
+        <p class="splash__welcome">Welcome — fast, offline-capable QR scanning.</p>
+        <v-progress-circular indeterminate color="primary" size="32" width="3" class="mt-4" />
       </div>
     </div>
   </Transition>
@@ -52,14 +37,22 @@ defineProps<{
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+  background: linear-gradient(
+    160deg,
+    rgb(var(--v-theme-primary)) 0%,
+    rgb(var(--v-theme-secondary)) 100%
+  );
   color: rgb(var(--v-theme-on-primary));
   padding: 24px;
   text-align: center;
 }
 
 .splash--dark {
-  background: linear-gradient(160deg, rgb(var(--v-theme-surface)) 0%, rgb(var(--v-theme-primary)) 120%);
+  background: linear-gradient(
+    160deg,
+    rgb(var(--v-theme-surface)) 0%,
+    rgb(var(--v-theme-primary)) 120%
+  );
 }
 
 .splash__inner {

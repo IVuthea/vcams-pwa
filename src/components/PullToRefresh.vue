@@ -45,10 +45,7 @@ const readyToRelease = computed(() => pullDistance.value >= threshold);
 <template>
   <div class="ptr">
     <div class="ptr__indicator">
-      <div
-        class="ptr__dot"
-        :style="indicatorStyle"
-      >
+      <div class="ptr__dot" :style="indicatorStyle">
         <slot
           name="indicator"
           :is-refreshing="isRefreshing"
@@ -101,12 +98,16 @@ const readyToRelease = computed(() => pullDistance.value >= threshold);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
   will-change: transform, opacity;
   z-index: 1;
 }
 .ptr__icon {
-  transition: transform 120ms ease, color 120ms ease;
+  transition:
+    transform 120ms ease,
+    color 120ms ease;
 }
 .ptr__icon--ready {
   color: rgb(var(--v-theme-success));

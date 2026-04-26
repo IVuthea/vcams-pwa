@@ -59,12 +59,7 @@ onMounted(async () => {
   >
     A new version is available.
     <template #actions>
-      <v-btn
-        variant="text"
-        @click="applyUpdate"
-      >
-        Reload
-      </v-btn>
+      <v-btn variant="text" @click="applyUpdate"> Reload </v-btn>
     </template>
   </v-snackbar>
 

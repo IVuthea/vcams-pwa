@@ -42,15 +42,8 @@ const showBottomNav = computed(
 
 <template>
   <v-app>
-    <v-app-bar
-      v-if="!isFullscreen"
-      density="comfortable"
-      color="primary"
-      flat
-    >
-      <v-app-bar-title class="font-weight-bold">
-        MEP
-      </v-app-bar-title>
+    <v-app-bar v-if="!isFullscreen" density="comfortable" color="primary" flat>
+      <v-app-bar-title class="font-weight-bold"> MEP </v-app-bar-title>
 
       <v-spacer />
 
@@ -72,22 +65,13 @@ const showBottomNav = computed(
     </v-app-bar>
 
     <v-main>
-      <v-container
-        v-if="!isFullscreen"
-        fluid
-        class="pa-3 pa-sm-4"
-      >
+      <v-container v-if="!isFullscreen" fluid class="pa-3 pa-sm-4">
         <slot />
       </v-container>
       <slot v-else />
     </v-main>
 
-    <v-bottom-navigation
-      v-if="showBottomNav"
-      v-model="navValue"
-      grow
-      color="primary"
-    >
+    <v-bottom-navigation v-if="showBottomNav" v-model="navValue" grow color="primary">
       <v-btn value="projects">
         <v-icon>mdi-folder-multiple-outline</v-icon>
         <span>Projects</span>

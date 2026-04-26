@@ -2,11 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import http from '@/http/axios';
 import type { NormalizedError } from '@/http/axios';
-import {
-  clearStoredAuth,
-  getStoredAuth,
-  setStoredAuth,
-} from '@/db';
+import { clearStoredAuth, getStoredAuth, setStoredAuth } from '@/db';
 import type { AuthUser } from '@/db';
 
 interface LoginResponse {
@@ -15,7 +11,7 @@ interface LoginResponse {
   user?: AuthUser;
   data: {
     token?: string;
-  }
+  };
   [key: string]: unknown;
 }
 

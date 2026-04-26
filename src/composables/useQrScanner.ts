@@ -12,12 +12,7 @@ export interface QrScanResult {
   at: number;
 }
 
-export type CameraPermissionState =
-  | 'unknown'
-  | 'prompt'
-  | 'granted'
-  | 'denied'
-  | 'unsupported';
+export type CameraPermissionState = 'unknown' | 'prompt' | 'granted' | 'denied' | 'unsupported';
 
 export interface UseQrScannerReturn {
   videoRef: Ref<HTMLVideoElement | null>;
@@ -199,11 +194,7 @@ export function useQrScanner(): UseQrScannerReturn {
           // frame on landscape-camera-in-portrait-viewport setups.
           calculateScanRegion: (video: HTMLVideoElement) => {
             const rect = video.getBoundingClientRect();
-            const reticleCss = Math.min(
-              window.innerWidth * 0.7,
-              window.innerHeight * 0.7,
-              320,
-            );
+            const reticleCss = Math.min(window.innerWidth * 0.7, window.innerHeight * 0.7, 320);
             const targetCss = reticleCss * 0.9; // sit inside the frame
             const coverScale = Math.max(
               rect.width / video.videoWidth,
@@ -213,10 +204,7 @@ export function useQrScanner(): UseQrScannerReturn {
             // is degenerate (e.g. zero before layout settles).
             const safeScale = coverScale > 0 ? coverScale : 1;
             const maxVideo = Math.min(video.videoWidth, video.videoHeight);
-            const size = Math.max(
-              80,
-              Math.min(maxVideo, Math.round(targetCss / safeScale)),
-            );
+            const size = Math.max(80, Math.min(maxVideo, Math.round(targetCss / safeScale)));
             return {
               x: Math.round((video.videoWidth - size) / 2),
               y: Math.round((video.videoHeight - size) / 2),

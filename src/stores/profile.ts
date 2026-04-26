@@ -21,14 +21,7 @@ function extractEmployee(payload: unknown): EmployeeModel | null {
   if (!payload || typeof payload !== 'object') return null;
   const root = payload as Record<string, unknown>;
   const data = root.data as Record<string, unknown> | undefined;
-  const candidates: unknown[] = [
-    root.user,
-    root.employee,
-    data?.user,
-    data?.employee,
-    data,
-    root,
-  ];
+  const candidates: unknown[] = [root.user, root.employee, data?.user, data?.employee, data, root];
   for (const c of candidates) {
     if (c && typeof c === 'object' && 'id' in (c as Record<string, unknown>)) {
       return c as EmployeeModel;

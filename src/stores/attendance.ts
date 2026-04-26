@@ -14,9 +14,7 @@ import type { AttendancePeriod } from '@/types/attendance';
 
 export type AttendanceScanLog = AttendanceScanRecord;
 
-export type RecordScanResult =
-  | { ok: true; log: AttendanceScanLog }
-  | { ok: false; error: string };
+export type RecordScanResult = { ok: true; log: AttendanceScanLog } | { ok: false; error: string };
 
 export type PreviewScanResult =
   | { ok: true; employeeId: number; employeeName: string }
@@ -30,14 +28,7 @@ export interface SubmitSummary {
 
 // Canonical period order so the batch upload walks shifts predictably:
 // morning → afternoon → OT, in/out paired.
-const PERIOD_ORDER: AttendancePeriod[] = [
-  'p1_in',
-  'p1_out',
-  'p2_in',
-  'p2_out',
-  'p3_in',
-  'p3_out',
-];
+const PERIOD_ORDER: AttendancePeriod[] = ['p1_in', 'p1_out', 'p2_in', 'p2_out', 'p3_in', 'p3_out'];
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');

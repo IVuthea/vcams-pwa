@@ -43,41 +43,15 @@ const onDismissError = (): void => {
 </script>
 
 <template>
-  <v-row
-    justify="center"
-    align="center"
-    class="ma-0 fill-height"
-  >
-    <v-col
-      cols="12"
-      sm="8"
-      md="6"
-      lg="4"
-      class="pa-0"
-    >
-      <v-card
-        class="pa-6"
-        elevation="3"
-      >
+  <v-row justify="center" align="center" class="ma-0 fill-height">
+    <v-col cols="12" sm="8" md="6" lg="4" class="pa-0">
+      <v-card class="pa-6" elevation="3">
         <div class="text-center mb-4">
-          <v-avatar
-            color="primary"
-            size="72"
-            class="mb-3"
-          >
-            <v-icon
-              size="44"
-              color="white"
-            >
-              mdi-cube-outline
-            </v-icon>
+          <v-avatar color="primary" size="72" class="mb-3">
+            <v-icon size="44" color="white"> mdi-cube-outline </v-icon>
           </v-avatar>
-          <h1 class="text-h5 font-weight-bold">
-            Sign in
-          </h1>
-          <p class="text-body-2 text-medium-emphasis mt-1">
-            Enter your credentials to continue.
-          </p>
+          <h1 class="text-h5 font-weight-bold">Sign in</h1>
+          <p class="text-body-2 text-medium-emphasis mt-1">Enter your credentials to continue.</p>
         </div>
 
         <v-alert
@@ -91,11 +65,7 @@ const onDismissError = (): void => {
           {{ auth.error }}
         </v-alert>
 
-        <v-form
-          ref="formRef"
-          :disabled="auth.isLoading"
-          @submit.prevent="onSubmit"
-        >
+        <v-form ref="formRef" :disabled="auth.isLoading" @submit.prevent="onSubmit">
           <v-text-field
             v-model="email"
             label="Email"
