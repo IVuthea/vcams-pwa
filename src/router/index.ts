@@ -11,15 +11,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
-    name: 'home',
-    component: () => import('@/views/HomeView.vue'),
-    meta: { title: 'Cube Scanner' },
-  },
-  {
-    path: '/scan',
-    name: 'scanner',
-    component: () => import('@/views/ScannerView.vue'),
-    meta: { title: 'Scan QR' },
+    redirect: { name: 'projects' },
   },
   {
     path: '/projects',
@@ -40,22 +32,22 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Employees' },
   },
   {
-    path: '/attendance/:projectId',
-    name: 'attendance',
+    path: '/projects/:projectId',
+    name: 'projects.detail',
     component: () => import('@/views/AttendanceView.vue'),
     props: true,
     meta: { title: 'Project Attendance' },
   },
   {
-    path: '/attendance/:projectId/scan',
-    name: 'attendance-scan',
+    path: '/projects/:projectId/attendance-scan-qr',
+    name: 'projects.attendance-scan-qr',
     component: () => import('@/views/AttendanceScanView.vue'),
     props: true,
     meta: { title: 'Scan Attendance', fullscreen: true },
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: { name: 'home' },
+    redirect: { name: 'projects' },
   },
 ];
 
@@ -72,7 +64,7 @@ router.beforeEach((to) => {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
   if (to.name === 'login' && auth.isAuthenticated) {
-    return { name: 'home' };
+    return { name: 'projects' };
   }
   return true;
 });

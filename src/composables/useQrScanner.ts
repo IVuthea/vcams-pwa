@@ -189,8 +189,8 @@ export function useQrScanner(): UseQrScannerReturn {
           maxScansPerSecond: 5,
           returnDetailedScanResult: true,
           // Match the visible scan region to the reticle frame in
-          // ScannerView/AttendanceScanView (~min(70vw, 70vh, 320px)), shrunk
-          // slightly so the bracket highlight sits inside the frame.
+          // AttendanceScanView (~min(70vw, 70vh, 320px)), shrunk slightly so
+          // the bracket highlight sits inside the frame.
           //
           // The qr-scanner region is in VIDEO pixels, but the reticle is sized
           // in CSS pixels and the <video> uses object-fit: cover — so we have

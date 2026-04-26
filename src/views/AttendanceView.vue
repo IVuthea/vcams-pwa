@@ -165,7 +165,7 @@ const formatDate = (ts: number): string => {
           size="small"
           prepend-icon="mdi-qrcode-scan"
           :disabled="store.isSubmitting"
-          :to="{ name: 'attendance-scan', params: { projectId } }"
+          :to="{ name: 'projects.attendance-scan-qr', params: { projectId } }"
         >
           Scan
         </v-btn>

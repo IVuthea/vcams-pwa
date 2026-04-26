@@ -24,15 +24,11 @@ const toggleTheme = (): void => {
 
 const navValue = computed<string>({
   get: () => {
-    if (route.name === 'scanner') return 'scanner';
-    if (route.name === 'projects') return 'projects';
     if (route.name === 'employees') return 'employees';
     if (route.name === 'profile') return 'profile';
-    return 'home';
+    return 'projects';
   },
   set: (val: string) => {
-    if (val === 'home' && route.name !== 'home') router.push({ name: 'home' });
-    if (val === 'scanner' && route.name !== 'scanner') router.push({ name: 'scanner' });
     if (val === 'projects' && route.name !== 'projects') router.push({ name: 'projects' });
     if (val === 'employees' && route.name !== 'employees') router.push({ name: 'employees' });
     if (val === 'profile' && route.name !== 'profile') router.push({ name: 'profile' });
@@ -92,10 +88,6 @@ const showBottomNav = computed(
       grow
       color="primary"
     >
-      <v-btn value="home">
-        <v-icon>mdi-home</v-icon>
-        <span>Home</span>
-      </v-btn>
       <v-btn value="projects">
         <v-icon>mdi-folder-multiple-outline</v-icon>
         <span>Projects</span>
@@ -103,10 +95,6 @@ const showBottomNav = computed(
       <v-btn value="employees">
         <v-icon>mdi-account-group-outline</v-icon>
         <span>People</span>
-      </v-btn>
-      <v-btn value="scanner">
-        <v-icon>mdi-qrcode-scan</v-icon>
-        <span>Scan</span>
       </v-btn>
       <v-btn value="profile">
         <v-icon>mdi-account-circle-outline</v-icon>

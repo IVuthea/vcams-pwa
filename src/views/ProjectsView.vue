@@ -12,7 +12,7 @@ const search = ref('');
 const onPullRefresh = (): Promise<boolean> => store.fetchProjects();
 
 const goToAttendance = (project: ProjectModel): void => {
-  router.push({ name: 'attendance', params: { projectId: String(project.id) } });
+  router.push({ name: 'projects.detail', params: { projectId: String(project.id) } });
 };
 
 const filtered = computed<ProjectModel[]>(() => {

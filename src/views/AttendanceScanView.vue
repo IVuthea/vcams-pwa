@@ -158,7 +158,7 @@ const onToggleTorch = async (): Promise<void> => {
 
 const onClose = async (): Promise<void> => {
   await stop();
-  router.push({ name: 'attendance', params: { projectId: props.projectId } });
+  router.push({ name: 'projects.detail', params: { projectId: props.projectId } });
 };
 
 // Tab-hide camera release, mirroring the prior dialog. Resumes only if it

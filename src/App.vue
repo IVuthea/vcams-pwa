@@ -35,7 +35,7 @@ onMounted(async () => {
   const currentName = router.currentRoute.value.name;
   if (auth.isAuthenticated) {
     if (currentName === 'login') {
-      await router.replace({ name: 'home' });
+      await router.replace({ name: 'projects' });
     }
   } else if (currentName !== 'login') {
     await router.replace({ name: 'login' });
