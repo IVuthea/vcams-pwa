@@ -205,15 +205,6 @@ onMounted(() => {
             <v-card-title class="text-wrap">
               {{ project.full_name || project.sort_name || `Project #${project.id}` }}
             </v-card-title>
-            <v-card-subtitle v-if="project.code">
-              <v-icon
-                size="14"
-                class="mr-1"
-              >
-                mdi-pound
-              </v-icon>
-              {{ project.code }}
-            </v-card-subtitle>
           </v-card-item>
 
           <v-card-text class="pt-2">
@@ -228,7 +219,7 @@ onMounted(() => {
               >
                 mdi-account-hard-hat
               </v-icon>
-              <span class="text-medium-emphasis mr-2">Constructor:</span>
+              <span class="text-medium-emphasis mr-2">:</span>
               <span>{{ project.main_constructor }}</span>
             </div>
             <div class="d-flex align-center flex-wrap text-body-2">
@@ -239,7 +230,7 @@ onMounted(() => {
               >
                 mdi-calendar-range
               </v-icon>
-              <span class="text-medium-emphasis mr-2">Duration:</span>
+              <span class="text-medium-emphasis mr-2">:</span>
               <span>{{ formatDate(project.start_date) }} → {{ formatDate(project.end_date) }}</span>
             </div>
           </v-card-text>

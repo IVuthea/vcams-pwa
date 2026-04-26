@@ -13,6 +13,9 @@ interface LoginResponse {
   token?: string;
   access_token?: string;
   user?: AuthUser;
+  data: {
+    token?: string;
+  }
   [key: string]: unknown;
 }
 
