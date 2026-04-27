@@ -78,7 +78,7 @@ const showBottomNav = computed(
       </v-btn>
       <v-btn value="employees">
         <v-icon>mdi-account-group-outline</v-icon>
-        <span>People</span>
+        <span>Employee</span>
       </v-btn>
       <v-btn value="profile">
         <v-icon>mdi-account-circle-outline</v-icon>
