@@ -79,12 +79,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function login(email: string, password: string): Promise<boolean> {
+  async function login(username: string, password: string): Promise<boolean> {
     isLoading.value = true;
     error.value = null;
     try {
       const { data } = await http.post<LoginResponse>('/auth/login', {
-        email,
+        email: username,
         password,
       });
       const t = data?.data?.token;
@@ -93,7 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
         return false;
       }
       token.value = t;
-      user.value = data?.user ?? { email };
+      user.value = data?.user ?? { email: username };
       await setStoredAuth({ token: t, user: user.value ?? undefined });
       return true;
     } catch (e) {

@@ -11,13 +11,13 @@ const auth = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
-const email = ref('');
+const username = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const formRef = ref<VForm | null>(null);
 
-const emailRules = [
-  (v: string): true | string => (!!v && v.trim().length > 0) || 'Email is required',
+const usernameRules = [
+  (v: string): true | string => (!!v && v.trim().length > 0) || 'Username is required',
 ];
 
 const passwordRules = [
@@ -29,7 +29,7 @@ const onSubmit = async (): Promise<void> => {
   const { valid } = await formRef.value.validate();
   if (!valid) return;
 
-  const ok = await auth.login(email.value.trim(), password.value);
+  const ok = await auth.login(username.value.trim(), password.value);
   if (!ok) return;
 
   password.value = '';
@@ -67,14 +67,14 @@ const onDismissError = (): void => {
 
         <v-form ref="formRef" :disabled="auth.isLoading" @submit.prevent="onSubmit">
           <v-text-field
-            v-model="email"
-            label="Email"
-            type="email"
-            autocomplete="email"
+            v-model="username"
+            label="Username"
+            type="text"
+            autocomplete="username"
             autocapitalize="none"
             spellcheck="false"
-            :rules="emailRules"
-            prepend-inner-icon="mdi-email"
+            :rules="usernameRules"
+            prepend-inner-icon="mdi-account"
             required
             autofocus
           />
