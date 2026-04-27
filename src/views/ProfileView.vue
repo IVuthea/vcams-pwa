@@ -10,6 +10,7 @@ const auth = useAuthStore();
 const router = useRouter();
 
 const employee = computed(() => profile.employee);
+const appVersion = __APP_VERSION__;
 
 const initial = computed(() => {
   const name = employee.value?.name ?? '';
@@ -184,6 +185,8 @@ onMounted(() => {
           >
             Sign out
           </v-btn>
+
+          <p class="text-caption text-medium-emphasis text-center mt-3 mb-0">v{{ appVersion }}</p>
         </template>
 
         <v-card v-else class="pa-6 text-center" variant="tonal">

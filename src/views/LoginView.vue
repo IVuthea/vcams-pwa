@@ -15,6 +15,7 @@ const username = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const formRef = ref<VForm | null>(null);
+const appVersion = __APP_VERSION__;
 
 const usernameRules = [
   (v: string): true | string => (!!v && v.trim().length > 0) || 'Username is required',
@@ -104,6 +105,8 @@ const onDismissError = (): void => {
             Sign in
           </v-btn>
         </v-form>
+
+        <p class="text-caption text-medium-emphasis text-center mt-4 mb-0">v{{ appVersion }}</p>
       </v-card>
     </v-col>
   </v-row>
