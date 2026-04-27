@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useDisplay, useTheme } from 'vuetify';
 import { useRoute, useRouter } from 'vue-router';
 import { useOnline } from '@/composables/useOnline';
+import { usePwaInstall } from '@/composables/usePwaInstall';
 import { useAuthStore } from '@/stores/auth';
 import { writeStoredTheme } from '@/utils/themeStorage';
 
@@ -12,6 +13,7 @@ const route = useRoute();
 const router = useRouter();
 const online = useOnline();
 const auth = useAuthStore();
+const { canInstall, promptInstall } = usePwaInstall();
 
 const isDark = computed(() => theme.global.current.value.dark);
 const isFullscreen = computed(() => route.meta?.fullscreen === true);
@@ -56,6 +58,17 @@ const showBottomNav = computed(
       >
         {{ online ? 'Online' : 'Offline' }}
       </v-chip>
+
+      <v-btn
+        v-if="canInstall"
+        prepend-icon="mdi-download"
+        variant="tonal"
+        size="small"
+        class="mr-2"
+        @click="promptInstall"
+      >
+        Install
+      </v-btn>
 
       <v-btn
         :icon="isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'"
