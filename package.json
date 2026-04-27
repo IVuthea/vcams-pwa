@@ -1,9 +1,9 @@
 {
-  "name": "cube-scanner",
+  "name": "mep-pwa",
   "private": true,
-  "version": "0.1.0+1",
+  "version": "0.1.0+2",
   "type": "module",
-  "description": "Installable PWA QR scanner with torch toggle, offline support, and IndexedDB scan history.",
+  "description": "MEP attendance tracking PWA — QR-based check-in with torch toggle, offline support, and IndexedDB scan history.",
   "scripts": {
     "dev": "vite",
     "dev:android": "node scripts/dev-android.mjs",

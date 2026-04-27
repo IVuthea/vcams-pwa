@@ -2,6 +2,7 @@
 import { useTheme } from 'vuetify';
 
 const theme = useTheme();
+const appVersion = __APP_VERSION__;
 
 defineProps<{
   visible: boolean;
@@ -21,10 +22,11 @@ defineProps<{
         <div class="splash__logo">
           <v-icon size="72" color="white"> mdi-cube-outline </v-icon>
         </div>
-        <h1 class="splash__title">Cube Scanner</h1>
+        <h1 class="splash__title">MEP</h1>
         <p class="splash__welcome">Welcome — fast, offline-capable QR scanning.</p>
         <v-progress-circular indeterminate color="primary" size="32" width="3" class="mt-4" />
       </div>
+      <p class="splash__version">v{{ appVersion }}</p>
     </div>
   </Transition>
 </template>
@@ -87,6 +89,18 @@ defineProps<{
   opacity: 0.9;
   max-width: 22rem;
   margin: 0;
+}
+
+.splash__version {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+  text-align: center;
 }
 
 .splash-fade-leave-active {

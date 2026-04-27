@@ -22,9 +22,9 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
-        name: 'Cube Scanner',
-        short_name: 'Scanner',
-        description: 'QR scanner PWA with torch toggle and offline scan history.',
+        name: 'MEP',
+        short_name: 'MEP',
+        description: 'MEP attendance tracking PWA with QR-based check-in.',
         theme_color: '#2196F3',
         background_color: '#ffffff',
         display: 'standalone',

@@ -21,7 +21,7 @@ There are no tests in this project — the build (`vue-tsc` + Vite) is the prima
 
 ## What this app actually does
 
-Despite the package name `cube-scanner` and the `Cube Scanner` PWA manifest, the app shipping today is an **attendance tracking PWA for MEP** (the app bar reads "MEP"). The core flow:
+The app is an **attendance tracking PWA for MEP** — the npm package, PWA manifest, splash, and app bar all read `MEP` / `mep-pwa`. Some internal storage identifiers (IndexedDB `DB_NAME` in [src/db/index.ts](src/db/index.ts), the localStorage theme key in [src/utils/themeStorage.ts](src/utils/themeStorage.ts)) still use the legacy `cube-scanner` namespace; renaming them would orphan existing users' stored sessions/scans, so they are intentionally left alone. The core flow:
 
 1. User logs in with email + password against `/auth/login` ([LoginView.vue](src/views/LoginView.vue) → [stores/auth.ts](src/stores/auth.ts)).
 2. They pick a project ([ProjectsView.vue](src/views/ProjectsView.vue) → `GET /project`).

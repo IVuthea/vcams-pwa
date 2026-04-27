@@ -1,6 +1,6 @@
-# Cube Scanner
+# MEP
 
-An installable Progressive Web App (PWA) QR scanner with a torch (flashlight) toggle, built with Vue 3, Vuetify 3, TypeScript, and Vite. Works offline after first load and persists scan history in IndexedDB.
+An installable Progressive Web App (PWA) for MEP attendance tracking via QR-based check-in, with a torch (flashlight) toggle, built with Vue 3, Vuetify 3, TypeScript, and Vite. Works offline after first load and persists scan history in IndexedDB.
 
 ## Features
 
