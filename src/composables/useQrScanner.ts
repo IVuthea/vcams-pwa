@@ -205,9 +205,16 @@ export function useQrScanner(): UseQrScannerReturn {
             const safeScale = coverScale > 0 ? coverScale : 1;
             const maxVideo = Math.min(video.videoWidth, video.videoHeight);
             const size = Math.max(80, Math.min(maxVideo, Math.round(targetCss / safeScale)));
+            // Mirror --reticle-offset-y in AttendanceScanView (-6vh): shift the
+            // scan region (and its bracket SVG) up by the same amount so it
+            // stays aligned with the visible reticle frame.
+            const offsetCss = window.innerHeight * -0.06;
+            const yOffsetVideo = Math.round(offsetCss / safeScale);
+            const yCentered = Math.round((video.videoHeight - size) / 2);
+            const y = Math.max(0, Math.min(video.videoHeight - size, yCentered + yOffsetVideo));
             return {
               x: Math.round((video.videoWidth - size) / 2),
-              y: Math.round((video.videoHeight - size) / 2),
+              y,
               width: size,
               height: size,
             };

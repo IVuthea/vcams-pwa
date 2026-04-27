@@ -250,10 +250,6 @@ onBeforeUnmount(async () => {
 
         <div v-if="isScanning && !isStarting" class="scanner-reticle" aria-hidden="true">
           <div class="scanner-reticle__frame">
-            <!-- <span class="scanner-reticle__corner scanner-reticle__corner--tl" /> -->
-            <!-- <span class="scanner-reticle__corner scanner-reticle__corner--tr" /> -->
-            <!-- <span class="scanner-reticle__corner scanner-reticle__corner--bl" /> -->
-            <!-- <span class="scanner-reticle__corner scanner-reticle__corner--br" /> -->
             <span class="scanner-reticle__line" />
           </div>
         </div>
@@ -376,6 +372,7 @@ onBeforeUnmount(async () => {
   color: #fff;
   z-index: 1000;
   --reticle-size: min(70vw, 70vh, 320px);
+  --reticle-offset-y: -6vh;
 }
 .scanner-screen__body {
   flex: 1 1 auto;
@@ -462,7 +459,7 @@ onBeforeUnmount(async () => {
 }
 .scanner-reticle__frame {
   position: absolute;
-  top: 50%;
+  top: calc(50% + var(--reticle-offset-y));
   left: 50%;
   width: var(--reticle-size);
   aspect-ratio: 1;
@@ -557,7 +554,7 @@ onBeforeUnmount(async () => {
 .scanner-fab {
   position: absolute;
   left: 50%;
-  top: calc(50% + var(--reticle-size) / 2 + 28px);
+  top: calc(50% + var(--reticle-offset-y) + var(--reticle-size) / 2 + 28px);
   transform: translateX(-50%);
   z-index: 3;
 }
