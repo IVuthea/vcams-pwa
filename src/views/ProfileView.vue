@@ -122,7 +122,7 @@ onMounted(() => {
                 <template #prepend>
                   <v-icon color="primary"> mdi-identifier </v-icon>
                 </template>
-                <v-list-item-title>Employee code</v-list-item-title>
+                <!-- <v-list-item-title>Employee code</v-list-item-title> -->
                 <v-list-item-subtitle>{{ employee.code }}</v-list-item-subtitle>
               </v-list-item>
 
@@ -132,7 +132,7 @@ onMounted(() => {
                 <template #prepend>
                   <v-icon color="primary"> mdi-phone </v-icon>
                 </template>
-                <v-list-item-title>Phone</v-list-item-title>
+                <!-- <v-list-item-title>Phone</v-list-item-title> -->
                 <v-list-item-subtitle>
                   <a :href="`tel:${employee.phone}`" class="text-decoration-none">{{
                     employee.phone
@@ -140,7 +140,7 @@ onMounted(() => {
                 </v-list-item-subtitle>
               </v-list-item>
 
-              <v-divider v-if="employee.phone && wageTypeLabel" />
+              <!-- <v-divider v-if="employee.phone && wageTypeLabel" />
 
               <v-list-item v-if="wageTypeLabel">
                 <template #prepend>
@@ -148,7 +148,7 @@ onMounted(() => {
                 </template>
                 <v-list-item-title>Wage type</v-list-item-title>
                 <v-list-item-subtitle>{{ wageTypeLabel }}</v-list-item-subtitle>
-              </v-list-item>
+              </v-list-item> -->
 
               <v-divider v-if="wageTypeLabel && employee.nfc" />
 
