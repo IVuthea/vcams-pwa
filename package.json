@@ -1,7 +1,7 @@
 {
   "name": "mep-pwa",
   "private": true,
-  "version": "0.1.0+2",
+  "version": "0.1.0+3",
   "type": "module",
   "description": "MEP attendance tracking PWA — QR-based check-in with torch toggle, offline support, and IndexedDB scan history.",
   "scripts": {
