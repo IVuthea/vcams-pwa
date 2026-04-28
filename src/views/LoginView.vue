@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import IosInstallDialog from '@/components/IosInstallDialog.vue';
+import { usePwaInstall } from '@/composables/usePwaInstall';
 import { useAuthStore } from '@/stores/auth';
 
 interface VForm {
@@ -10,12 +12,19 @@ interface VForm {
 const auth = useAuthStore();
 const router = useRouter();
 const route = useRoute();
+const { canInstall, promptInstall } = usePwaInstall();
 
 const username = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const formRef = ref<VForm | null>(null);
+const showIosInstall = ref(false);
 const appVersion = __APP_VERSION__;
+
+const onInstallClick = async (): Promise<void> => {
+  const outcome = await promptInstall();
+  if (outcome === 'ios-instructions') showIosInstall.value = true;
+};
 
 const usernameRules = [
   (v: string): true | string => (!!v && v.trim().length > 0) || 'Username is required',
@@ -106,10 +115,24 @@ const onDismissError = (): void => {
           </v-btn>
         </v-form>
 
+        <v-btn
+          v-if="canInstall"
+          variant="tonal"
+          color="primary"
+          block
+          prepend-icon="mdi-download"
+          class="mt-3"
+          @click="onInstallClick"
+        >
+          Install app
+        </v-btn>
+
         <p class="text-caption text-medium-emphasis text-center mt-4 mb-0">v{{ appVersion }}</p>
       </v-card>
     </v-col>
   </v-row>
+
+  <IosInstallDialog v-model="showIosInstall" />
 </template>
 
 <style scoped>

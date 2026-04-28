@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useDisplay, useTheme } from 'vuetify';
 import { useRoute, useRouter } from 'vue-router';
+import IosInstallDialog from '@/components/IosInstallDialog.vue';
 import { useOnline } from '@/composables/useOnline';
 import { usePwaInstall } from '@/composables/usePwaInstall';
 import { useAuthStore } from '@/stores/auth';
@@ -14,6 +15,13 @@ const router = useRouter();
 const online = useOnline();
 const auth = useAuthStore();
 const { canInstall, promptInstall } = usePwaInstall();
+
+const showIosInstall = ref(false);
+
+const onInstallClick = async (): Promise<void> => {
+  const outcome = await promptInstall();
+  if (outcome === 'ios-instructions') showIosInstall.value = true;
+};
 
 const isDark = computed(() => theme.global.current.value.dark);
 const isFullscreen = computed(() => route.meta?.fullscreen === true);
@@ -65,7 +73,7 @@ const showBottomNav = computed(
         variant="tonal"
         size="small"
         class="mr-2"
-        @click="promptInstall"
+        @click="onInstallClick"
       >
         Install
       </v-btn>
@@ -98,5 +106,7 @@ const showBottomNav = computed(
         <span>Profile</span>
       </v-btn>
     </v-bottom-navigation>
+
+    <IosInstallDialog v-model="showIosInstall" />
   </v-app>
 </template>
