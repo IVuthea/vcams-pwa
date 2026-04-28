@@ -25,6 +25,8 @@ const onInstallClick = async (): Promise<void> => {
 
 const isDark = computed(() => theme.global.current.value.dark);
 const isFullscreen = computed(() => route.meta?.fullscreen === true);
+const isLogin = computed(() => route.name === 'login');
+const showAppBar = computed(() => !isFullscreen.value && !isLogin.value);
 
 const toggleTheme = (): void => {
   const next = isDark.value ? 'light' : 'dark';
@@ -52,7 +54,7 @@ const showBottomNav = computed(
 
 <template>
   <v-app>
-    <v-app-bar v-if="!isFullscreen" density="comfortable" color="primary" flat>
+    <v-app-bar v-if="showAppBar" density="comfortable" color="primary" flat>
       <v-app-bar-title class="font-weight-bold"> MEP </v-app-bar-title>
 
       <v-spacer />

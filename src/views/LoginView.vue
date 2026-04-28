@@ -137,6 +137,6 @@ const onDismissError = (): void => {
 
 <style scoped>
 .fill-height {
-  min-height: calc(100vh - 64px);
+  min-height: 100vh;
 }
 </style>
