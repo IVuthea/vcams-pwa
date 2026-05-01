@@ -21,7 +21,7 @@ There are no tests in this project — the build (`vue-tsc` + Vite) is the prima
 
 ## What this app actually does
 
-The app is an **attendance tracking PWA for MEP** — the npm package, PWA manifest, splash, and app bar all read `MEP` / `mep-pwa`. Some internal storage identifiers (IndexedDB `DB_NAME` in [src/db/index.ts](src/db/index.ts), the localStorage theme key in [src/utils/themeStorage.ts](src/utils/themeStorage.ts)) still use the legacy `cube-scanner` namespace; renaming them would orphan existing users' stored sessions/scans, so they are intentionally left alone. The core flow:
+The app is an **attendance tracking PWA called Vcams** — the npm package (`vcams-pwa`), PWA manifest, splash, and app bar all read `Vcams`. Some internal storage identifiers (IndexedDB `DB_NAME` in [src/db/index.ts](src/db/index.ts), the localStorage theme key in [src/utils/themeStorage.ts](src/utils/themeStorage.ts)) still use the legacy `cube-scanner` namespace; renaming them would orphan existing users' stored sessions/scans, so they are intentionally left alone. The core flow:
 
 1. User logs in with email + password against `/auth/login` ([LoginView.vue](src/views/LoginView.vue) → [stores/auth.ts](src/stores/auth.ts)).
 2. They pick a project ([ProjectsView.vue](src/views/ProjectsView.vue) → `GET /project`).
@@ -135,7 +135,15 @@ A 401 response calls `hooks.onUnauthorized()` (wired in main.ts to `auth.logout(
 
 ### Theme
 
-[src/plugins/vuetify.ts](src/plugins/vuetify.ts) reads the persisted theme from [src/utils/themeStorage.ts](src/utils/themeStorage.ts) **at module load** and falls back to `prefers-color-scheme`. Theme storage uses **localStorage, not IndexedDB**, because the read is synchronous and runs before first paint — IDB would cause a flash of the wrong theme. AppLayout's toggle calls both `theme.change()` and `writeStoredTheme()`. Both light and dark palettes are derived from the cube icon's blues; Vuetify defaults set `VBtn.variant='flat'`, `VCard.rounded='lg'`, and outlined-comfortable text fields globally — match those defaults instead of overriding per call site.
+[src/plugins/vuetify.ts](src/plugins/vuetify.ts) reads the persisted theme from [src/utils/themeStorage.ts](src/utils/themeStorage.ts) **at module load** and falls back to `prefers-color-scheme`. Theme storage uses **localStorage, not IndexedDB**, because the read is synchronous and runs before first paint — IDB would cause a flash of the wrong theme. AppLayout's toggle calls both `theme.change()` and `writeStoredTheme()`. Both light and dark palettes use green as the primary color (`#66BB6A`); Vuetify defaults set `VBtn.variant='flat'`, `VCard.rounded='lg'`, and outlined-comfortable text fields globally — match those defaults instead of overriding per call site.
+
+### PWA install prompt
+
+[src/composables/usePwaInstall.ts](src/composables/usePwaInstall.ts) is a **module-level singleton**, not a per-component composable. The `deferredPrompt`, `canInstall`, `isIos`, and `installed` refs are allocated once at module load and shared across the whole app. This is intentional — the `beforeinstallprompt` event fires at most once per session, so all callers must see the same ref.
+
+`promptInstall()` returns a union: `'accepted' | 'dismissed' | 'unavailable' | 'ios-instructions'`. The `'ios-instructions'` branch is iOS-only (no `beforeinstallprompt` on Safari) — [AppLayout.vue](src/components/AppLayout.vue) catches it and opens [IosInstallDialog.vue](src/components/IosInstallDialog.vue).
+
+iOS Safari detection (`detectIosSafari()`) explicitly excludes Chrome iOS, Firefox iOS, and in-app browsers (Instagram, FB, etc.) because only Safari can trigger Add to Home Screen — keep those UA checks when updating.
 
 ### Pull-to-refresh
 
