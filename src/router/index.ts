@@ -70,7 +70,7 @@ router.beforeEach((to) => {
 });
 
 router.afterEach((to) => {
-  const title = (to.meta?.title as string | undefined) ?? 'MEP';
+  const title = (to.meta?.title as string | undefined) ?? 'Vcams';
   if (typeof document !== 'undefined') {
     document.title = title;
   }

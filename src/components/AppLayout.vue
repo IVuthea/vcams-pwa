@@ -55,7 +55,7 @@ const showBottomNav = computed(
 <template>
   <v-app>
     <v-app-bar v-if="showAppBar" density="comfortable" color="primary" flat>
-      <v-app-bar-title class="font-weight-bold"> MEP </v-app-bar-title>
+      <v-app-bar-title class="font-weight-bold"> Vcams </v-app-bar-title>
 
       <v-spacer />
 

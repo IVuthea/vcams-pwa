@@ -22,9 +22,9 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
-        name: 'MEP',
-        short_name: 'MEP',
-        description: 'MEP attendance tracking PWA with QR-based check-in.',
+        name: 'Vcams',
+        short_name: 'Vcams',
+        description: 'Vcams attendance tracking PWA with QR-based check-in.',
         theme_color: '#2196F3',
         background_color: '#ffffff',
         display: 'standalone',

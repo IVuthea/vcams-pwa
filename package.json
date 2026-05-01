@@ -1,9 +1,9 @@
 {
-  "name": "mep-pwa",
+  "name": "vcams-pwa",
   "private": true,
   "version": "0.1.0+4",
   "type": "module",
-  "description": "MEP attendance tracking PWA — QR-based check-in with torch toggle, offline support, and IndexedDB scan history.",
+  "description": "Vcams attendance tracking PWA — QR-based check-in with torch toggle, offline support, and IndexedDB scan history.",
   "scripts": {
     "dev": "vite",
     "dev:android": "node scripts/dev-android.mjs",

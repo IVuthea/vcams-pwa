@@ -7,12 +7,12 @@ const model = defineModel<boolean>({ required: true });
     <v-card rounded="lg">
       <v-card-title class="text-h6 d-flex align-center">
         <v-icon class="mr-2" color="primary">mdi-cellphone-arrow-down</v-icon>
-        Install MEP
+        Install Vcams
       </v-card-title>
 
       <v-card-text class="pb-2">
         <p class="text-body-2 mb-4">
-          Add MEP to your Home Screen for a full-screen, app-like experience and offline access.
+          Add Vcams to your Home Screen for a full-screen, app-like experience and offline access.
         </p>
 
         <ol class="ios-steps">

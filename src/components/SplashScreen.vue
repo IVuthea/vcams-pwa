@@ -22,7 +22,7 @@ defineProps<{
         <div class="splash__logo">
           <v-icon size="72" color="white"> mdi-cube-outline </v-icon>
         </div>
-        <h1 class="splash__title">MEP</h1>
+        <h1 class="splash__title">Vcams</h1>
         <p class="splash__welcome">Welcome — fast, offline-capable QR scanning.</p>
         <v-progress-circular indeterminate color="primary" size="32" width="3" class="mt-4" />
       </div>
