@@ -25,7 +25,7 @@ export default defineConfig({
         name: 'Vcams',
         short_name: 'Vcams',
         description: 'Vcams attendance tracking PWA with QR-based check-in.',
-        theme_color: '#2196F3',
+        theme_color: '#66BB6A',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
