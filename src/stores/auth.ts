@@ -83,11 +83,11 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true;
     error.value = null;
     try {
-      const { data } = await http.post<LoginResponse>('/auth/login', {
-        email: username,
+      const { data } = await http.post<LoginResponse>('/login', {
+        username: username,
         password,
       });
-      const t = data?.data?.token;
+      const t = data?.token;
       if (!t) {
         error.value = 'Login response did not include a token.';
         return false;

@@ -81,8 +81,8 @@ onMounted(() => {
           <v-card class="profile-hero pa-6 text-center" elevation="2">
             <v-avatar size="120" class="profile-hero__avatar mb-3">
               <v-img
-                v-if="employee.profile?.url"
-                :src="employee.profile.url"
+                v-if="employee.profile_img?.url"
+                :src="employee.profile_img.url"
                 :alt="employee.name || 'Profile photo'"
               />
               <span v-else class="text-h2 font-weight-bold text-white">

@@ -27,8 +27,8 @@ export const useEmployeesStore = defineStore('employees', () => {
     error.value = null;
     isOffline.value = false;
     try {
-      const res = await http.get('/employee');
-      const list = (res?.data?.data?.employees?.data ?? []) as EmployeeModel[];
+      const res = await http.get('/listEmployee');
+      const list = (res?.data?.data ?? []) as EmployeeModel[];
       employees.value = Array.isArray(list) ? list : [];
       return true;
     } catch (e) {

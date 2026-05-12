@@ -41,10 +41,10 @@ export const useProfileStore = defineStore('profile', () => {
     isLoading.value = true;
     error.value = null;
     try {
-      const { data } = await http.get('/auth/user');
+      const { data } = await http.get('/profile');
       const e = extractEmployee(data);
       if (!e) {
-        error.value = 'Unexpected response from /auth/user.';
+        error.value = 'Unexpected response from /profile.';
         return false;
       }
       employee.value = e;
