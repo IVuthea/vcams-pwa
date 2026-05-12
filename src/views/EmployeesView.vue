@@ -114,8 +114,8 @@ onMounted(() => {
               <template #prepend>
                 <v-avatar size="48" class="employee-avatar">
                   <v-img
-                    v-if="employee.profile_img?.url"
-                    :src="employee.profile_img.url"
+                    v-if="employee.profile?.url"
+                    :src="employee.profile.url"
                     :alt="employee.name || 'Employee'"
                   />
                   <span v-else class="text-h6 font-weight-bold text-white">
