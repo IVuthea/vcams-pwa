@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchCurrentUser(): Promise<boolean> {
     if (!token.value) return false;
     try {
-      const { data } = await http.get('/auth/user');
+      const { data } = await http.get('/profile');
       const u = extractUser(data);
       if (u) {
         user.value = u;

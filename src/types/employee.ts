@@ -16,4 +16,5 @@ export interface EmployeeModel {
   nfc?: string;
   role?: RoleModel;
   profile?: FileModel;
+  profile_img?: FileModel;
 }
