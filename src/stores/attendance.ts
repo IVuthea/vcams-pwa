@@ -224,7 +224,7 @@ export const useAttendanceStore = defineStore('attendance', () => {
           const d = new Date(scan.createdAt);
           const date = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
           const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-          await http.post('backupSingle', {
+          await http.put('backupSingle', {
             id: scan.employeeId,
             projectId: projectIdNum,
             period: scan.period,
