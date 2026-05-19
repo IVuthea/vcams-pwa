@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfileStore } from '@/stores/profile';
 import { useAuthStore } from '@/stores/auth';
 import PullToRefresh from '@/components/PullToRefresh.vue';
+import ChangePasswordDialog from '@/views/dialog/ChangePasswordDialog.vue';
 
 const profile = useProfileStore();
 const auth = useAuthStore();
@@ -30,6 +31,17 @@ const workingStatusColor = computed(() => {
   if (v === 'terminated' || v === 'resigned') return 'error';
   return 'primary';
 });
+
+const passwordDialog = ref(false);
+const passwordSuccess = ref(false);
+
+const onChangePassword = (): void => {
+  passwordDialog.value = true;
+};
+
+const onPasswordChanged = (): void => {
+  passwordSuccess.value = true;
+};
 
 const onPullRefresh = (): Promise<boolean> => profile.fetchProfile();
 
@@ -175,11 +187,23 @@ onMounted(() => {
           </v-card>
 
           <v-btn
-            color="error"
+            color="primary"
             variant="tonal"
             size="large"
             block
             class="mt-4"
+            prepend-icon="mdi-lock-reset"
+            @click="onChangePassword"
+          >
+            Change password
+          </v-btn>
+
+          <v-btn
+            color="error"
+            variant="tonal"
+            size="large"
+            block
+            class="mt-3"
             prepend-icon="mdi-logout"
             @click="onLogout"
           >
@@ -199,6 +223,12 @@ onMounted(() => {
       </PullToRefresh>
     </v-col>
   </v-row>
+
+  <ChangePasswordDialog v-model="passwordDialog" @success="onPasswordChanged" />
+
+  <v-snackbar v-model="passwordSuccess" color="success" timeout="3000" location="top">
+    Password updated successfully.
+  </v-snackbar>
 </template>
 
 <style scoped>
