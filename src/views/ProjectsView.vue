@@ -3,13 +3,25 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProjectsStore } from '@/stores/projects';
 import PullToRefresh from '@/components/PullToRefresh.vue';
+import { countAttendanceScansByProject } from '@/db';
 import type { ProjectModel } from '@/types/project';
 
 const store = useProjectsStore();
 const router = useRouter();
 const search = ref('');
 
-const onPullRefresh = (): Promise<boolean> => store.fetchProjects();
+// Unsubmitted scans stored on this device, keyed by projectId. Reloaded on
+// every mount so returning from a project reflects submits/deletes there.
+const scanCounts = ref<Record<string, number>>({});
+const loadScanCounts = async (): Promise<void> => {
+  scanCounts.value = await countAttendanceScansByProject();
+};
+const scanCount = (project: ProjectModel): number => scanCounts.value[String(project.id)] ?? 0;
+
+const onPullRefresh = (): Promise<boolean> => {
+  void loadScanCounts();
+  return store.fetchProjects();
+};
 
 const goToAttendance = (project: ProjectModel): void => {
   router.push({ name: 'projects.detail', params: { projectId: String(project.id) } });
@@ -39,6 +51,7 @@ const formatDate = (value?: string): string => {
 };
 
 onMounted(() => {
+  void loadScanCounts();
   if (!store.hasProjects) {
     void store.fetchProjects();
   }
@@ -142,6 +155,16 @@ onMounted(() => {
                   {{ (project.sort_name || project.full_name || '?').charAt(0).toUpperCase() }}
                 </span>
               </div>
+              <v-chip
+                v-if="scanCount(project) > 0"
+                class="project-cover__badge"
+                color="warning"
+                variant="elevated"
+                size="small"
+                prepend-icon="mdi-clipboard-clock-outline"
+              >
+                {{ scanCount(project) }} unsubmitted
+              </v-chip>
             </div>
 
             <v-card-item class="pb-1">

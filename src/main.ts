@@ -14,7 +14,6 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(router);
 app.use(vuetify);
 
 // Pinia must be installed before useAuthStore() is called.
@@ -37,11 +36,13 @@ configureAuthHooks({
   },
 });
 
-// Restore the persisted session before mounting so the router guard sees
-// the right `isAuthenticated` state on first navigation. Wrapped in an
-// async IIFE rather than top-level await so the bundle stays compatible
-// with the es2020 build target.
+// Restore the persisted session before installing the router: `app.use(router)`
+// kicks off the initial navigation immediately, so installing it earlier would
+// run the guard with `isAuthenticated === false` and bounce a refresh to /login,
+// losing the current route. Wrapped in an async IIFE rather than top-level
+// await so the bundle stays compatible with the es2020 build target.
 void (async () => {
   await auth.restore();
+  app.use(router);
   app.mount('#app');
 })();

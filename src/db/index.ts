@@ -270,6 +270,27 @@ export async function deleteAttendanceScan(id: number): Promise<boolean> {
   }
 }
 
+// Number of unsubmitted scans per projectId. Walks the projectId index with a
+// key cursor so record values are never deserialized.
+export async function countAttendanceScansByProject(): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  try {
+    const db = await getDB();
+    let cursor = await db
+      .transaction('attendance_scans')
+      .store.index('projectId')
+      .openKeyCursor();
+    while (cursor) {
+      const key = String(cursor.key);
+      counts[key] = (counts[key] ?? 0) + 1;
+      cursor = await cursor.continue();
+    }
+  } catch (e) {
+    console.error('countAttendanceScansByProject failed', e);
+  }
+  return counts;
+}
+
 export async function clearAttendanceScans(projectId: string): Promise<boolean> {
   try {
     const db = await getDB();

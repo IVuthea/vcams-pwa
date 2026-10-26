@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import {
   addAttendanceScan,
   clearAttendanceScans,
@@ -39,6 +39,9 @@ function pad2(n: number): string {
 // indicator on each row has a chance to render.
 const SUBMIT_STEP_DELAY_MS = 400;
 
+// Max scans uploaded at the same time during a batch submit.
+const SUBMIT_CONCURRENCY = 1;
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -73,17 +76,15 @@ export const useAttendanceStore = defineStore('attendance', () => {
   const currentProjectId = ref<string | null>(null);
   const isLoading = ref(false);
   // Submission state for the batch upload to `attendance/single`.
-  // `submittingScanId` is the scan currently in-flight; the period buttons
-  // and the cross icon both key off it.
+  // `submittingScanIds` holds the scans currently in-flight (up to
+  // SUBMIT_CONCURRENCY); the period buttons and the cross icon key off it.
   const isSubmitting = ref(false);
-  const submittingScanId = ref<number | null>(null);
-  // Derived from the in-flight scan so the period buttons can show which
-  // shift/direction is currently being uploaded — distinct from
-  // `selectedPeriod`, which is the user's (or auto-walked) view selection.
-  const submittingPeriod = computed<AttendancePeriod | null>(() => {
-    if (submittingScanId.value === null) return null;
-    return scans.value.find((s) => s.id === submittingScanId.value)?.period ?? null;
-  });
+  const submittingScanIds = ref<number[]>([]);
+  // Periods the batch has started but not finished: a period joins when its
+  // first scan is picked up and leaves only once all of its scans are done,
+  // so the button keeps loading through the pauses between its scans.
+  // Distinct from `selectedPeriod`, the user's (or auto-walked) view selection.
+  const submittingPeriods = ref<AttendancePeriod[]>([]);
 
   function selectPeriod(period: AttendancePeriod): void {
     selectedPeriod.value = period;
@@ -155,9 +156,9 @@ export const useAttendanceStore = defineStore('attendance', () => {
     }
   }
 
-  // POST every recorded scan to `attendance/single`, one at a time, walking
-  // periods in canonical order. Per-item status is exposed via
-  // `submittingScanId` (in-flight) and `submitResults` (final).
+  // Upload every recorded scan, up to SUBMIT_CONCURRENCY at a time, picking
+  // them up in canonical period order. Per-item status is exposed via
+  // `submittingScanIds` (in-flight).
   //
   // Contract: the batch ALWAYS runs to completion. Each scan is wrapped in
   // its own try/catch so a network/server failure on one scan never aborts
@@ -198,10 +199,29 @@ export const useAttendanceStore = defineStore('attendance', () => {
       });
     };
 
-    try {
+    // Queue positions of the scans currently in-flight. The period selector
+    // follows the earliest one, so it still walks forward in shift order
+    // instead of flickering between the periods of parallel uploads.
+    const inFlight = new Set<number>();
+    let nextIndex = 0;
+
+    // Scans per period still left to finish in this batch.
+    const remainingByPeriod = new Map<AttendancePeriod, number>();
+    for (const s of ordered) {
+      remainingByPeriod.set(s.period, (remainingByPeriod.get(s.period) ?? 0) + 1);
+    }
+
+    // Each worker pulls the next scan off the shared queue until it's empty.
+    // JS is single-threaded, so `nextIndex++` can't hand one scan to two workers.
+    const worker = async (): Promise<void> => {
       let first = true;
-      for (const scan of ordered) {
-        // Pace the batch so the UI can render per-item progress between
+      while (nextIndex < ordered.length) {
+        const index = nextIndex++;
+        const scan = ordered[index];
+        if (!submittingPeriods.value.includes(scan.period)) {
+          submittingPeriods.value = [...submittingPeriods.value, scan.period];
+        }
+        // Pace each worker so the UI can render per-item progress between
         // requests. Skip the first iteration so submission feels responsive.
         if (!first) await delay(SUBMIT_STEP_DELAY_MS);
         first = false;
@@ -210,10 +230,9 @@ export const useAttendanceStore = defineStore('attendance', () => {
         // iteration can break the loop. Failures are recorded and we move on.
         const id = scan.id as number;
         try {
-          // Walk the period selector forward so the user can watch each
-          // shift/direction tab light up as its scans are processed.
-          selectedPeriod.value = scan.period;
-          submittingScanId.value = id;
+          inFlight.add(index);
+          selectedPeriod.value = ordered[Math.min(...inFlight)].period;
+          submittingScanIds.value = [...submittingScanIds.value, id];
           // Wipe any stale error message from a prior attempt so retries
           // present a clean slate; we'll re-mark it below if this attempt
           // also fails. Local UI updates first, persistence is best-effort.
@@ -249,10 +268,24 @@ export const useAttendanceStore = defineStore('attendance', () => {
             // Swallow any error from logging/state — the batch must keep going.
           }
           failureCount++;
+        } finally {
+          inFlight.delete(index);
+          submittingScanIds.value = submittingScanIds.value.filter((x) => x !== id);
+          const remaining = (remainingByPeriod.get(scan.period) ?? 1) - 1;
+          remainingByPeriod.set(scan.period, remaining);
+          if (remaining === 0) {
+            submittingPeriods.value = submittingPeriods.value.filter((p) => p !== scan.period);
+          }
         }
       }
+    };
+
+    try {
+      const workerCount = Math.min(SUBMIT_CONCURRENCY, ordered.length);
+      await Promise.all(Array.from({ length: workerCount }, () => worker()));
     } finally {
-      submittingScanId.value = null;
+      submittingScanIds.value = [];
+      submittingPeriods.value = [];
       isSubmitting.value = false;
     }
 
@@ -276,8 +309,8 @@ export const useAttendanceStore = defineStore('attendance', () => {
     currentProjectId,
     isLoading,
     isSubmitting,
-    submittingScanId,
-    submittingPeriod,
+    submittingScanIds,
+    submittingPeriods,
     selectPeriod,
     previewScan,
     recordScan,

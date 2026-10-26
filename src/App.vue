@@ -32,13 +32,15 @@ onMounted(async () => {
 
   await Promise.all([minDelay, validate]);
 
-  const currentName = router.currentRoute.value.name;
+  const current = router.currentRoute.value;
   if (auth.isAuthenticated) {
-    if (currentName === 'login') {
-      await router.replace({ name: 'projects' });
+    if (current.name === 'login') {
+      const redirect = typeof current.query.redirect === 'string' ? current.query.redirect : null;
+      await router.replace(redirect ?? { name: 'projects' });
     }
-  } else if (currentName !== 'login') {
-    await router.replace({ name: 'login' });
+  } else if (current.name !== 'login') {
+    // Token was rejected — keep where the user was so login can send them back.
+    await router.replace({ name: 'login', query: { redirect: current.fullPath } });
   }
 
   showSplash.value = false;

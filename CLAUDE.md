@@ -62,10 +62,10 @@ Five stores in [src/stores/](src/stores/), each `defineStore` with the setup-fun
 - `employees`, `profile` — straightforward fetch stores.
 
 **`submitAllScans()` invariants** ([attendance.ts:165](src/stores/attendance.ts#L165)):
-- Sorts scans by `PERIOD_ORDER` (p1_in → p1_out → p2_in → … → p3_out) so the user watches periods light up in shift order.
-- Each scan is wrapped in **its own try/catch**. A failure never aborts the batch — failed scans get `submitErrorMsg` persisted on the record (via `setAttendanceScanError`), the loop moves on.
-- A `SUBMIT_STEP_DELAY_MS = 400` pause sits between iterations so the per-row spinner is actually visible. Don't remove it without replacing the UI feedback.
-- `submittingScanId` (in-flight) and `submittingPeriod` (derived) drive the row spinner and the period button highlight respectively. They're distinct from `selectedPeriod`, which is the user's view selection.
+- Sorts scans by `PERIOD_ORDER` (p1_in → p1_out → p2_in → … → p3_out) into a queue, then runs `SUBMIT_CONCURRENCY = 3` workers that pull from it, so up to 3 uploads are in flight at once. `selectedPeriod` follows the earliest in-flight scan, so periods still light up in shift order.
+- Each scan is wrapped in **its own try/catch**. A failure never aborts the batch — failed scans get `submitErrorMsg` persisted on the record (via `setAttendanceScanError`), the worker moves on.
+- A `SUBMIT_STEP_DELAY_MS = 400` pause sits between each worker's iterations so the per-row spinner is actually visible. Don't remove it without replacing the UI feedback.
+- `submittingScanIds` (in-flight) and `submittingPeriods` are arrays that drive the row spinners and the period button highlights respectively. A period enters `submittingPeriods` when its first scan is claimed and leaves only when all of its scans in the batch have finished, so the button doesn't flicker during the step delay. They're distinct from `selectedPeriod`, which is the user's view selection.
 
 ### Data layer (IndexedDB)
 
